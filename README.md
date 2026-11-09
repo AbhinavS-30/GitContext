@@ -3,8 +3,9 @@
 GitContext is a local codebase search project for finding traceable evidence in
 small Python repositories and selected Markdown documentation.
 
-**Status:** bounded file discovery is implemented as a Python function with tests.
-Source reading, indexing, search, and generation are not implemented. No CLI exists yet.
+**Status:** bounded file discovery and UTF-8 source reading are implemented as
+Python functions with tests. Indexing, search, and generation are not implemented.
+No CLI exists yet.
 
 ## Planned flow
 
@@ -82,3 +83,31 @@ Filesystem order determines selection when a limit is reached; output records ar
 sorted afterward. Discovery is not an atomic snapshot. Future source reading must
 recheck containment, symlinks, and actual byte limits. Concurrent adversarial path
 replacement is not prevented by this component. Exclusions cannot detect all secrets.
+
+## Source reading (macOS/Linux)
+
+```python
+from gitcontext.reading import read_sources
+
+sources = read_sources(report, max_total_bytes=10_000_000)
+for source in sources.files:
+    print(source.path, source.size_bytes)
+print("Partial:", sources.partial)
+```
+
+The reader accepts a discovery report. It opens paths relative to directory file
+descriptors, refusing symlinks at each component, and rejects non-regular files.
+It enforces the discovery per-file limit again and a total read budget (10 MB by
+default), using unbuffered reads with one extra byte to detect overflow. The total
+budget counts bytes from rejected content too; total consumption is at most the
+budget plus one probe byte. Oversized files are rejected, never silently truncated.
+
+UTF-8 decoding is strict, newlines are preserved, and NUL-containing content is
+rejected. There is no encoding fallback or automatic repair. UTF-8 decoding and
+the NUL check are conservative content checks, not a complete binary detector.
+Changed size/timestamps during reading produce a failure report. Discovery issues
+and partial status are preserved; other useful files survive individual failures.
+
+Directory-descriptor operations target macOS/Linux. This is not a whole-repository
+atomic snapshot or a guarantee against every concurrent edit. A file changed before
+reading is accepted if it meets current limits; source version hashes come later.

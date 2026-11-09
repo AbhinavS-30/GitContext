@@ -35,3 +35,24 @@ by limits or access errors. Discovery never reads source content.
 
 This does not guarantee secret detection or safety against concurrent path
 replacement. Future reading must validate paths again and bound actual reads.
+
+## 2026-11-09: bounded source reading
+
+Read source as unbuffered bytes before strict UTF-8 decoding, preserving newlines.
+Use the discovery per-file limit and a separate 10 MB default total-read budget.
+Allow one probe byte beyond a cap to distinguish an exact fit from oversized input.
+Count rejected content against the total budget. Reject oversized input rather than
+returning truncated text that could later look like complete evidence.
+
+Use POSIX directory-relative open operations with no-follow flags on each path
+component. This avoids following a file or intermediate directory replaced by a
+symlink after discovery. Nonblocking open prevents a replaced FIFO from hanging
+before its file type can be checked. Reject non-regular descriptors. Pin the root
+descriptor for the batch and close descriptors through context managers/finally.
+Windows support is deferred. An atomic snapshot of the whole tree is not promised.
+
+Reject invalid UTF-8 and NUL-containing text explicitly. Do not guess encodings;
+non-UTF-8 Python source is currently unsupported even if Python could interpret its
+encoding declaration. Compare size and modification/change times around each read;
+this detects common concurrent edits but cannot guarantee an immutable snapshot.
+Reuse the small issue record from discovery for now; no new dependencies are needed.
