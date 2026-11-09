@@ -1,37 +1,49 @@
 # Status
 
-Updated: November 9, 2026.
+Updated: November 9, 2026. Phase 1 of five core phases: setup and ingestion.
 
 ## Current work
 
-Codex created the initial package scaffold, project guidance, plan, decisions,
-ignore rules, and CI configuration at the user's request. No ingestion, chunking,
-indexing, retrieval, model integration, or CLI is implemented.
+Standalone setup is published at https://github.com/AbhinavS-30/GitContext.
+Initial commit: `4f904a8`; pushed successfully, with GitHub Actions passing.
 
-The learner requested a public standalone repository and an interview-explainable
-project. Understanding of ingestion has not yet been demonstrated; its first
-understanding question remains pending. Codex authored the scaffold.
+Codex implemented bounded file discovery in `src/gitcontext/discovery.py` and
+12 behavioral tests, added pinned pytest, and added its execution to CI. Discovery
+returns selected relative paths/sizes, skip/error reasons, limits, and partial
+status. It does not read source text or execute target code. Documentation records
+current behavior and trade-offs.
 
 ## Verification and publication
 
-Passed locally: editable installation with pinned development tools, Ruff lint,
-Ruff format check (one Python file), source compilation, installed-package import,
-and pip dependency consistency check. No application tests or retrieval evaluation
-results exist yet. CI runs the installation, style, compile, and import checks.
+- pytest: 12 passed.
+- Ruff lint and format checks: passed.
+- Actual GitContext scan: eight selected files, 24 examined entries, partial=False.
+- Actual scan with max_files=2: two selected files, partial=True, file_limit issue.
+- The learner explicitly requested committing and pushing discovery after the
+  walkthrough. This status accompanies that commit; the session handoff records
+  the push and remote CI result. Git history records the final commit identifier.
 
-Public repository: https://github.com/AbhinavS-30/GitContext. This status accompanies
-the initial scaffold commit. The session handoff reports its hash, push result,
-and remote CI result; Git history is the authoritative commit record.
+## Learning record
 
-## Environment and limitations
+After explanation and a simplified example, the learner correctly answered that
+reading source text does not execute its print statement. The learner also correctly
+identified that reaching a scan limit must be reported as partial. Directory exclusion
+rationale was explained; independent reasoning about it has not yet been demonstrated.
+Codex wrote the implementation and tests.
 
-Python 3.12.13 is available. GitHub API verified account AbhinavS-30; GitContext did
-not exist at inspection. Restricted-network auth checks were misleading; a network
-enabled API request succeeded. Ollama is installed but was not running. A local
-llama3.2:3b manifest exists; inference and embedding suitability are unverified.
+## Limitations and next task
 
-## Next small task
+The implementation and actual scan were explained. The follow-up distinction
+between expected exclusions and limit-induced partial results remains a learning
+gap; publication was explicitly requested without answering that question.
+Next component: explain bounded source reading, its content/encoding and failure
+policies, and check understanding before implementing it.
 
-Explain and agree on ingestion rules and output contracts. Ask the learner why
-GitContext must read Python files without importing them, even when file extensions
-are allowed. Wait for the answer before implementing ingestion.
+Discovery does not inspect content, detect all secrets, honor `.gitignore`, or
+provide an atomic snapshot. Limited selection follows filesystem order. Later
+reading must revalidate paths and bound bytes. Concurrent path replacement is not
+solved by discovery. No CLI, chunking, indexing, retrieval, model integration, or
+formal evaluation dataset exists. Tests do not demonstrate retrieval quality.
+
+Python 3.12.13 is available. Ollama was installed but not running at inspection;
+local llama3.2:3b has a manifest, but inference and embeddings remain unverified.

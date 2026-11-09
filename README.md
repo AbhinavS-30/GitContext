@@ -3,8 +3,8 @@
 GitContext is a local codebase search project for finding traceable evidence in
 small Python repositories and selected Markdown documentation.
 
-**Status:** initial project setup only. Repository ingestion, indexing, search,
-and answer generation are not implemented. No CLI is available yet.
+**Status:** bounded file discovery is implemented as a Python function with tests.
+Source reading, indexing, search, and generation are not implemented. No CLI exists yet.
 
 ## Planned flow
 
@@ -27,6 +27,7 @@ source .venv/bin/activate
 python -m pip install -e '.[dev]'
 ruff check .
 ruff format --check .
+python -m pytest -q
 python -m compileall -q src
 python -c 'import gitcontext; print(gitcontext.__doc__)'
 ```
@@ -50,3 +51,34 @@ There is no evaluation dataset or measured retrieval quality yet.
 
 See [the plan](docs/PLAN.md), [current status](docs/STATUS.md), and
 [design decisions](docs/DECISIONS.md).
+
+## File discovery
+
+```python
+from pathlib import Path
+from gitcontext.discovery import discover_repository
+
+report = discover_repository(Path("/path/to/local/repository"))
+for source in report.files:
+    print(source.path, source.size_bytes)
+print("Partial:", report.partial)
+for issue in report.issues:
+    print(issue.path, issue.reason)
+```
+
+Discovery selects `.py` and `.md` paths without reading their contents. It skips
+symlinks, known dependency/generated/private directories, credential-like filenames,
+unsupported extensions, and non-regular files. Excluded directories produce one
+report entry; their contents are not enumerated. Selection uses the explicit policy
+in `discovery.py`, not `.gitignore`. Git history is not required.
+
+Defaults: 10,000 examined directory entries, 1,000 selected files, 1,000,000 bytes
+per selected file, and 20 directory levels beneath the root. Configure these with
+`DiscoveryLimits`. Access failures and applied limits make results partial;
+expected exclusions do not. Invalid roots raise exceptions. Source encoding,
+binary content, and syntax are not inspected yet.
+
+Filesystem order determines selection when a limit is reached; output records are
+sorted afterward. Discovery is not an atomic snapshot. Future source reading must
+recheck containment, symlinks, and actual byte limits. Concurrent adversarial path
+replacement is not prevented by this component. Exclusions cannot detect all secrets.
