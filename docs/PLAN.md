@@ -22,6 +22,11 @@ revisited after ingestion. The old early-November release target is obsolete.
 First usable milestone: lexical search with reliable source metadata and freshness
 checks. A thin FastAPI interface follows the working, understood CLI pipeline.
 
+Progress on November 9: setup, bounded discovery, bounded UTF-8 reading, and exact-byte
+file fingerprints are implemented and tested. We are entering milestone 2 with
+Python chunking next. Ingestion is currently exposed through Python functions;
+the user-facing CLI remains future work, with the lexical search milestone.
+
 Deferred: remote cloning, multiple languages/repositories, Git history ingestion,
 target-code execution, autonomous edits, hosted vector databases, paid APIs,
 watchers, authentication, large frontend, premature reranking, and fine-tuning.

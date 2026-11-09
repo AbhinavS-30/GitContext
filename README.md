@@ -110,4 +110,11 @@ and partial status are preserved; other useful files survive individual failures
 
 Directory-descriptor operations target macOS/Linux. This is not a whole-repository
 atomic snapshot or a guarantee against every concurrent edit. A file changed before
-reading is accepted if it meets current limits; source version hashes come later.
+reading is accepted if it meets current limits.
+
+Each accepted source record includes `content_sha256`, a 64-character hexadecimal
+SHA-256 fingerprint of the exact bytes read. The hash uses those in-memory bytes,
+not a second file read. Paths and timestamps do not affect it; newline and other
+byte changes do. This metadata prepares for later freshness checks, but no hashes
+are persisted and no automatic stale-index detection exists yet. A hash does not
+establish that source text is safe or correct.

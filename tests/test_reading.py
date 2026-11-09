@@ -7,6 +7,37 @@ from gitcontext.discovery import DiscoveredFile, DiscoveryLimits, discover_repos
 from gitcontext.reading import read_sources
 
 
+def test_known_sha256_for_exact_bytes(tmp_path):
+    (tmp_path / "app.py").write_bytes(b"abc")
+    source = read_sources(discover_repository(tmp_path)).files[0]
+    assert source.content_sha256 == (
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+    )
+
+
+def test_hash_stable_across_paths_but_changes_for_same_size_edit(tmp_path):
+    (tmp_path / "a.py").write_bytes(b"return True")
+    (tmp_path / "b.py").write_bytes(b"return True")
+    discovery = discover_repository(tmp_path)
+    first = read_sources(discovery)
+    repeated = read_sources(discovery)
+    assert first.files[0].content_sha256 == first.files[1].content_sha256
+    assert first.files[0].content_sha256 == repeated.files[0].content_sha256
+    (tmp_path / "a.py").write_bytes(b"return None")
+    edited = read_sources(discovery).files[0]
+    assert edited.size_bytes == first.files[0].size_bytes
+    assert edited.content_sha256 != first.files[0].content_sha256
+
+
+def test_hash_preserves_newline_byte_differences(tmp_path):
+    (tmp_path / "a.py").write_bytes(b"pass\n")
+    (tmp_path / "b.py").write_bytes(b"pass\r\n")
+    report = read_sources(discover_repository(tmp_path))
+    assert report.files[0].content_sha256 != report.files[1].content_sha256
+    assert report.files[0].text == "pass\n"
+    assert report.files[1].text == "pass\r\n"
+
+
 def test_change_detected_during_read(tmp_path, monkeypatch):
     import os
 

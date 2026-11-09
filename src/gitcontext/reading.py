@@ -1,5 +1,6 @@
 """Read discovered source with bounded bytes and explicit failures (POSIX)."""
 
+import hashlib
 import os
 import stat
 from dataclasses import dataclass
@@ -13,6 +14,7 @@ class SourceFile:
     path: str
     text: str
     size_bytes: int
+    content_sha256: str
 
 
 @dataclass(frozen=True)
@@ -114,7 +116,14 @@ def read_sources(
                     partial = True
                     continue
                 text = raw.decode("utf-8")
-                files.append(SourceFile(selected.path, text, len(raw)))
+                files.append(
+                    SourceFile(
+                        path=selected.path,
+                        text=text,
+                        size_bytes=len(raw),
+                        content_sha256=hashlib.sha256(raw).hexdigest(),
+                    )
+                )
             except UnicodeDecodeError as exc:
                 issues.append(DiscoveryIssue(selected.path, "invalid_utf8", str(exc)))
                 partial = True

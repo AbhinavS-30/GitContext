@@ -56,3 +56,17 @@ non-UTF-8 Python source is currently unsupported even if Python could interpret 
 encoding declaration. Compare size and modification/change times around each read;
 this detects common concurrent edits but cannot guarantee an immutable snapshot.
 Reuse the small issue record from discovery for now; no new dependencies are needed.
+
+## 2026-11-09: exact-byte source fingerprints
+
+Attach `content_sha256` to each accepted source record using standard-library
+`hashlib.sha256(raw).hexdigest()`. Hash the already-read bytes rather than reopening
+the file, so text and fingerprint refer to the same read. Keep line endings intact.
+The field name identifies the algorithm; the digest is a 64-character hexadecimal
+string. Identical bytes at different paths have identical content hashes: this is
+not a path identity or repository snapshot identifier.
+
+This step adds metadata only. Persistence, current-versus-indexed comparisons,
+Git metadata, and snapshot identifiers remain separate later components. A content
+hash detects byte differences in practice; it is not a secret detector or evidence
+that source behavior is correct.
