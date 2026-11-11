@@ -4,7 +4,7 @@ GitContext is a local codebase search project for finding traceable evidence in
 small Python repositories and selected Markdown documentation.
 
 **Status:** bounded file discovery and UTF-8 source reading are implemented as
-Python functions with tests. Python source chunking is also implemented.
+Python functions with tests. Python and Markdown chunking are also implemented.
 Persistence, search, and generation are not implemented.
 No CLI exists yet.
 
@@ -151,6 +151,37 @@ Syntax/recursion/value parsing failures produce visible issues and line-based
 Line ranges are one-based and inclusive. Text is sliced from the original source,
 preserving newlines, and carries the file's content hash. Ordered chunks cover the
 source exactly once without overlap. The report records policy version and line
-limit. Markdown chunking, chunk/snapshot IDs, Git metadata, index persistence, and
+limit. Chunk/snapshot IDs, Git metadata, index persistence, and
 freshness comparisons are not implemented yet. Chunk count and passing tests are
 not measurements of retrieval quality.
+
+## Markdown chunking
+
+```python
+from gitcontext.markdown import chunk_markdown
+
+for source in sources.files:
+    if source.path.endswith(".md"):
+        result = chunk_markdown(source)
+        for chunk in result.chunks:
+            print(chunk.start_line, chunk.end_line, chunk.symbol_name)
+```
+
+Policy `markdown-atx-v1` starts sections at `#` through `######` headings with up
+to three leading spaces. Any heading level starts a new section. Text before the
+first heading is a `markdown_preamble`; sections are `markdown_section` chunks,
+with the heading title in `symbol_name`. Repeated titles are allowed; they are not
+identifiers. Closing heading hashes are omitted from metadata, not source text.
+
+Backtick and tilde fences suppress heading recognition until a matching closing
+fence. A closing fence must use the same character, at least the opening length,
+and no trailing info text. Unclosed fences produce a visible issue and preserve the
+rest as code. Sections over max_lines (80 by default) become flagged fragments;
+this mechanical limit may split a code example, so fragments can lack context.
+Exact text, original line ranges, and file hashes are retained without overlap.
+
+This is an explicit Markdown subset, not a full CommonMark parser. Underlined
+headings are kept as ordinary text; HTML blocks, indented-code state, and nested
+list/blockquote containers are not parsed. Documents using those constructs can
+have imperfect section boundaries. Heading hierarchy and inline markup are not
+interpreted. No Markdown or embedded code is rendered or executed.

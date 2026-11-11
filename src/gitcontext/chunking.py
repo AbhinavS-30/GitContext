@@ -9,7 +9,15 @@ from gitcontext.discovery import DiscoveryIssue
 from gitcontext.reading import SourceFile
 
 PYTHON_CHUNKING_VERSION = "python-top-level-v1"
-SymbolType = Literal["function", "async_function", "class", "module", "fallback"]
+SymbolType = Literal[
+    "function",
+    "async_function",
+    "class",
+    "module",
+    "fallback",
+    "markdown_section",
+    "markdown_preamble",
+]
 
 
 @dataclass(frozen=True)

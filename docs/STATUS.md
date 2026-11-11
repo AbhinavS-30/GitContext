@@ -1,7 +1,8 @@
 # Status
 
 Updated: November 10, 2026. Phase 2 of five core phases: chunking and index
-snapshots. Core ingestion and first Python chunking are implemented; no CLI exists.
+snapshots. Core ingestion, Python chunking, and Markdown chunking are implemented;
+no CLI exists.
 
 ## Current work
 
@@ -27,9 +28,14 @@ Remaining source is preserved in module chunks. Oversized ranges become flagged
 fragments; parse errors return explicit issues and line-based fallback chunks.
 Reports carry the policy version and max_lines. Documentation records the policy.
 
+Python chunking is published as `0cbc888`, pushed with GitHub Actions passing.
+Codex implemented `markdown.py` and 18 additional tests. It splits ATX headings,
+ignores headings inside fenced code, reports unclosed fences, preserves exact text,
+and flags oversized fragments. It reuses the chunk/report shape with Markdown kinds.
+
 ## Verification and publication
 
-- pytest: 50 passed (12 discovery, 21 reading/fingerprint, 17 chunking).
+- pytest: 68 passed (12 discovery, 21 reading/fingerprint, 17 Python, 18 Markdown).
 - Ruff lint and format checks: passed.
 - Actual GitContext scan: eight selected files, 24 examined entries, partial=False.
 - Actual scan with max_files=2: two selected files, partial=True, file_limit issue.
@@ -44,9 +50,12 @@ Reports carry the policy version and max_lines. Documentation records the policy
 - Actual Python chunking run: seven Python files, 97 chunks, zero parse issues.
   Joining each file's chunks reproduced its exact source. In reading.py,
   read_sources became two flagged fragments spanning lines 52–131 and 132–135.
-- The learner explicitly requested committing and pushing Python chunking after
-  the walkthrough. This status accompanies that commit; the session handoff
-  records its identifier, push result, and remote CI outcome.
+- Actual Markdown run before documentation updates: five files, 23 chunks, zero
+  issues. Joining each file's chunks reproduced its exact source. README sections
+  were correctly distinguished from the code examples they contain.
+- The learner explicitly requested committing and pushing Markdown chunking after
+  the walkthrough. This status accompanies that commit; its identifier, push
+  result, and remote CI outcome are reported in the session handoff.
 
 ## Learning record
 
@@ -73,14 +82,19 @@ The learner requested publication without answering the fragment follow-up.
 Codex explained that one fragment cannot establish the whole function's behavior;
 independent reasoning about this limitation remains unverified.
 
+The learner asked to move forward after the fenced-code question. Codex explained
+that heading-like comments inside fenced code must not start sections. Independent
+understanding of that distinction remains unverified. Codex wrote all Markdown code
+and tests; the learner has not independently written implementation code.
+
 ## Limitations and next task
 
 The implementation and actual scan were explained. The follow-up distinction
 between expected exclusions and limit-induced partial results remains a learning
 gap; publication was explicitly requested without answering that question.
-Python walkthrough is complete. Next: explain Markdown heading-based chunks,
-exact source coverage, and ignoring heading-like text inside fenced code blocks.
-Ask one understanding question and wait before implementing Markdown chunking.
+Markdown walkthrough and unclosed-fence explanation are complete. Next: explain
+stable chunk identities and snapshot metadata, distinguish content hashes from
+chunk identities, and ask one understanding question before implementation.
 Persistence, Git metadata, freshness checking, and search remain separate steps.
 
 Discovery does not inspect content, detect all secrets, honor `.gitignore`, or
@@ -89,7 +103,9 @@ requires macOS/Linux, supports UTF-8 only, and does not guarantee an immutable
 whole-repository snapshot. Hash persistence, Git version metadata, and automated
 freshness detection remain future work.
 Python chunks may be whitespace-only; line limits do not bound tokens, and methods
-are not separate chunks. No Markdown chunking, chunk IDs, CLI, persisted indexing,
+are not separate chunks. Markdown is a limited ATX/fence subset: no setext heading,
+HTML-block, indented-code-state, or nested-container parsing. Fragment limits may
+split code examples. No chunk IDs, CLI, persisted indexing,
 retrieval, model integration, or
 formal evaluation dataset exists. Tests do not demonstrate retrieval quality.
 

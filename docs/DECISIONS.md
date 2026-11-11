@@ -92,3 +92,20 @@ Parsing failures produce reported issues plus exact line-based fallback chunks.
 Do not claim symbols for fallback text. Empty source yields no chunks. Reports
 record policy version python-top-level-v1 and max_lines for later manifests.
 No chunk IDs, snapshot IDs, Git metadata, or persistence are added in this step.
+
+## 2026-11-10: explicit Markdown heading subset
+
+Reuse SourceChunk and ChunkingReport; add markdown_section and markdown_preamble
+kinds and keep section titles in symbol_name. This avoids a second result shape
+before retrieval. Names are metadata, not unique IDs. Start a new section at any
+ATX heading level; preserve preamble and exact line coverage without duplication.
+
+Use a small state machine for backtick/tilde fenced blocks so heading-like code
+does not create sections. Match fence character/length and require a plain closer.
+Report unclosed fences and preserve the remaining text. Apply the same 80-line
+fragmentation policy as Python, including explicit fragment metadata.
+
+Do not add a Markdown dependency yet. Document the narrow subset: setext headings,
+HTML blocks, indented-code state, and nested list/blockquote containers are not
+parsed. Do not claim CommonMark compliance. Improve this policy from observed
+retrieval failures rather than silently claiming all heading boundaries are correct.

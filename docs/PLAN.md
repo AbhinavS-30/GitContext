@@ -31,6 +31,10 @@ Progress on November 10: first Python AST chunking policy implemented locally an
 tested. The next chunking component is Markdown section handling; snapshots and
 persistence remain later parts of milestone 2.
 
+Markdown ATX heading chunking is also implemented and tested, with fenced
+code handling and explicit subset limitations. Stable chunk/snapshot identifiers
+and persisted manifests remain the next parts of milestone 2.
+
 Deferred: remote cloning, multiple languages/repositories, Git history ingestion,
 target-code execution, autonomous edits, hosted vector databases, paid APIs,
 watchers, authentication, large frontend, premature reranking, and fine-tuning.
