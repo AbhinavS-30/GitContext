@@ -1,6 +1,6 @@
 # Status
 
-Updated: November 10, 2026. Phase 2 of five core phases: chunking and index
+Updated: November 11, 2026. Phase 2 of five core phases: chunking and index
 snapshots. Core ingestion, Python chunking, and Markdown chunking are implemented;
 no CLI exists.
 
@@ -33,9 +33,14 @@ Codex implemented `markdown.py` and 18 additional tests. It splits ATX headings,
 ignores headings inside fenced code, reports unclosed fences, preserves exact text,
 and flags oversized fragments. It reuses the chunk/report shape with Markdown kinds.
 
+Markdown chunking is published as `f48ff8d`, pushed with GitHub Actions passing.
+Codex implemented `identities.py` and 18 additional test cases for deterministic
+chunk IDs. IDs bind all source chunk fields and chunking configuration using
+canonical JSON and version-prefixed SHA-256. No new dependencies were added.
+
 ## Verification and publication
 
-- pytest: 68 passed (12 discovery, 21 reading/fingerprint, 17 Python, 18 Markdown).
+- pytest: 86 passed (68 existing cases plus 18 chunk identity cases).
 - Ruff lint and format checks: passed.
 - Actual GitContext scan: eight selected files, 24 examined entries, partial=False.
 - Actual scan with max_files=2: two selected files, partial=True, file_limit issue.
@@ -53,9 +58,11 @@ and flags oversized fragments. It reuses the chunk/report shape with Markdown ki
 - Actual Markdown run before documentation updates: five files, 23 chunks, zero
   issues. Joining each file's chunks reproduced its exact source. README sections
   were correctly distinguished from the code examples they contain.
-- The learner explicitly requested committing and pushing Markdown chunking after
-  the walkthrough. This status accompanies that commit; its identifier, push
-  result, and remote CI outcome are reported in the session handoff.
+- Actual ID execution: identical a.py inputs twice yielded chunk-v1:c8531b74…;
+  identical source at b.py yielded chunk-v1:8e9d967d…. No file execution occurred.
+- The learner explicitly requested committing and pushing all pending changes.
+  This status accompanies the chunk ID commit; the session handoff records its
+  identifier, push result, and remote CI outcome.
 
 ## Learning record
 
@@ -87,14 +94,22 @@ that heading-like comments inside fenced code must not start sections. Independe
 understanding of that distinction remains unverified. Codex wrote all Markdown code
 and tests; the learner has not independently written implementation code.
 
+The learner requested moving forward after the path/ID question. Codex explained
+that moving unchanged source changes its chunk ID because location is part of the
+reference. Independent reasoning about that distinction remains unverified. Codex
+implemented all identity code and tests.
+Codex explained that max_lines changes IDs even for unchanged short chunks because
+configuration is part of identity. Independent reasoning remains unverified.
+
 ## Limitations and next task
 
 The implementation and actual scan were explained. The follow-up distinction
 between expected exclusions and limit-induced partial results remains a learning
 gap; publication was explicitly requested without answering that question.
-Markdown walkthrough and unclosed-fence explanation are complete. Next: explain
-stable chunk identities and snapshot metadata, distinguish content hashes from
-chunk identities, and ask one understanding question before implementation.
+Chunk ID walkthrough is complete. Next: explain a snapshot manifest as the file,
+hash, chunk, configuration, and completeness inventory of one indexing run. Ask
+why a Git commit alone cannot describe indexed uncommitted contents, and wait
+before implementing snapshot metadata. Git integration is a separate small step.
 Persistence, Git metadata, freshness checking, and search remain separate steps.
 
 Discovery does not inspect content, detect all secrets, honor `.gitignore`, or
@@ -105,7 +120,8 @@ freshness detection remain future work.
 Python chunks may be whitespace-only; line limits do not bound tokens, and methods
 are not separate chunks. Markdown is a limited ATX/fence subset: no setext heading,
 HTML-block, indented-code-state, or nested-container parsing. Fragment limits may
-split code examples. No chunk IDs, CLI, persisted indexing,
+split code examples. Chunk IDs are index-scoped and bind whole-file versions, not
+stable symbols across edits. No snapshot IDs, CLI, persisted indexing,
 retrieval, model integration, or
 formal evaluation dataset exists. Tests do not demonstrate retrieval quality.
 

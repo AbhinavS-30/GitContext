@@ -35,6 +35,10 @@ Markdown ATX heading chunking is also implemented and tested, with fenced
 code handling and explicit subset limitations. Stable chunk/snapshot identifiers
 and persisted manifests remain the next parts of milestone 2.
 
+Progress on November 11: deterministic, versioned chunk ID computation is implemented
+locally and tested. Snapshot metadata, Git context, persistence, and freshness
+comparison remain unfinished parts of milestone 2.
+
 Deferred: remote cloning, multiple languages/repositories, Git history ingestion,
 target-code execution, autonomous edits, hosted vector databases, paid APIs,
 watchers, authentication, large frontend, premature reranking, and fine-tuning.

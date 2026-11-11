@@ -109,3 +109,18 @@ Do not add a Markdown dependency yet. Document the narrow subset: setext heading
 HTML blocks, indented-code state, and nested list/blockquote containers are not
 parsed. Do not claim CommonMark compliance. Improve this policy from observed
 retrieval failures rather than silently claiming all heading boundaries are correct.
+
+## 2026-11-11: deterministic chunk references
+
+Keep identity computation separate from source chunking. `chunk_id` accepts one
+SourceChunk plus policy_version and max_lines from its report; it returns a
+version-prefixed SHA-256 reference without mutating the chunk. Include all chunk
+fields and configuration in canonical JSON (sorted keys, compact separators,
+UTF-8). Do not use Python's process-dependent built-in hash or random UUIDs.
+
+Include exact chunk text as well as the file hash so even inconsistent caller data
+gets a distinct reference; this does not validate that caller data is truthful.
+The entire file hash deliberately makes all its chunk IDs change after any file
+edit. Prefer that conservative version binding over tracking symbols across edits.
+IDs are scoped to an index, not globally unique repository identities. Collection
+snapshot context and persistence remain later work. No dependencies are added.

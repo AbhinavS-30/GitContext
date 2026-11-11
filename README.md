@@ -151,7 +151,7 @@ Syntax/recursion/value parsing failures produce visible issues and line-based
 Line ranges are one-based and inclusive. Text is sliced from the original source,
 preserving newlines, and carries the file's content hash. Ordered chunks cover the
 source exactly once without overlap. The report records policy version and line
-limit. Chunk/snapshot IDs, Git metadata, index persistence, and
+limit. Snapshot IDs, Git metadata, index persistence, and
 freshness comparisons are not implemented yet. Chunk count and passing tests are
 not measurements of retrieval quality.
 
@@ -185,3 +185,29 @@ headings are kept as ordinary text; HTML blocks, indented-code state, and nested
 list/blockquote containers are not parsed. Documents using those constructs can
 have imperfect section boundaries. Heading hierarchy and inline markup are not
 interpreted. No Markdown or embedded code is rendered or executed.
+
+## Deterministic chunk IDs
+
+```python
+from gitcontext.identities import chunk_id
+
+for chunk in result.chunks:
+    reference = chunk_id(
+        chunk, policy_version=result.policy_version, max_lines=result.max_lines
+    )
+    print(reference, chunk.path, chunk.start_line, chunk.end_line)
+```
+
+An ID is `chunk-v1:` plus a SHA-256 digest of canonical JSON containing all chunk
+fields (including exact text, relative path, file hash, range, symbol metadata,
+and fragment flag), chunking policy version, and line limit. Canonical JSON uses
+sorted keys, fixed separators, and UTF-8 to make serialization repeatable. Identical
+inputs produce identical IDs without a timestamp or random value.
+
+Changing paths, content, ranges, or configuration changes IDs. Including the whole
+file hash intentionally invalidates references even for chunks untouched by an edit
+elsewhere in that file. IDs identify evidence versions, not functions across edits.
+They are scoped to the selected repository/index; two repositories with identical
+relative paths, content, and configuration can share IDs. Snapshot identity will
+provide collection context later. The helper does not validate data against disk,
+detect staleness, persist anything, or prove code safety or answer correctness.
