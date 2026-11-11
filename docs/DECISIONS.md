@@ -70,3 +70,25 @@ This step adds metadata only. Persistence, current-versus-indexed comparisons,
 Git metadata, and snapshot identifiers remain separate later components. A content
 hash detects byte differences in practice; it is not a secret detector or evidence
 that source behavior is correct.
+
+## 2026-11-10: first Python chunking policy
+
+Use built-in AST parsing to identify only direct module-level functions, async
+functions, and classes. Start at the first decorator and end at AST end_lineno.
+Keep methods and nested definitions in the enclosing definition to avoid overlapping
+source chunks. Definitions inside module control flow remain module source. This
+sacrifices method-level retrieval granularity for an inspectable first policy.
+
+Preserve all intervening source as module chunks, including whitespace-only gaps.
+Slice original lines rather than AST-unparsing, which would change formatting and
+comments. Use universal-newline recognition that preserves newline bytes and does
+not mistake form feeds for new Python lines. Ranges are one-based and inclusive.
+
+Split ranges over 80 lines into non-overlapping fragments retaining parent symbol
+metadata. Fragments may split statements; explicitly flag every fragment. A line
+bound is not a token or character bound. Later model input needs its own budget.
+
+Parsing failures produce reported issues plus exact line-based fallback chunks.
+Do not claim symbols for fallback text. Empty source yields no chunks. Reports
+record policy version python-top-level-v1 and max_lines for later manifests.
+No chunk IDs, snapshot IDs, Git metadata, or persistence are added in this step.

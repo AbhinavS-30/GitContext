@@ -4,7 +4,8 @@ GitContext is a local codebase search project for finding traceable evidence in
 small Python repositories and selected Markdown documentation.
 
 **Status:** bounded file discovery and UTF-8 source reading are implemented as
-Python functions with tests. Indexing, search, and generation are not implemented.
+Python functions with tests. Python source chunking is also implemented.
+Persistence, search, and generation are not implemented.
 No CLI exists yet.
 
 ## Planned flow
@@ -118,3 +119,38 @@ not a second file read. Paths and timestamps do not affect it; newline and other
 byte changes do. This metadata prepares for later freshness checks, but no hashes
 are persisted and no automatic stale-index detection exists yet. A hash does not
 establish that source text is safe or correct.
+
+## Python chunking
+
+```python
+from gitcontext.chunking import chunk_python
+
+for source in sources.files:
+    if source.path.endswith(".py"):
+        result = chunk_python(source, max_lines=80)
+        for chunk in result.chunks:
+            print(chunk.path, chunk.start_line, chunk.end_line, chunk.symbol_name)
+        for issue in result.issues:
+            print(issue.path, issue.reason)
+```
+
+Policy `python-top-level-v1` uses `ast.parse` without execution. Top-level functions,
+async functions, and classes get their own ranges, starting at the first decorator.
+Methods and nested definitions remain in their enclosing definition. Definitions
+under module control flow remain module source. Imports, comments, blank lines, and
+other remaining source form separate module ranges, including whitespace-only gaps.
+Comments before the first decorator remain module source. No source is discarded.
+
+Every range is split at the configured line limit (80 by default) when necessary;
+all pieces of a split range have `is_fragment=True` and retain its symbol metadata.
+This can split statements and does not guarantee independently executable chunks.
+The bound is lines, not tokens or characters; a long individual line stays intact.
+Syntax/recursion/value parsing failures produce visible issues and line-based
+`fallback` chunks rather than invented symbol metadata. Empty files have no chunks.
+
+Line ranges are one-based and inclusive. Text is sliced from the original source,
+preserving newlines, and carries the file's content hash. Ordered chunks cover the
+source exactly once without overlap. The report records policy version and line
+limit. Markdown chunking, chunk/snapshot IDs, Git metadata, index persistence, and
+freshness comparisons are not implemented yet. Chunk count and passing tests are
+not measurements of retrieval quality.

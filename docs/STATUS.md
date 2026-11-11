@@ -1,7 +1,7 @@
 # Status
 
-Updated: November 9, 2026. Core ingestion is implemented; entering Phase 2 of five
-core phases: chunking and index snapshots. No CLI is implemented yet.
+Updated: November 10, 2026. Phase 2 of five core phases: chunking and index
+snapshots. Core ingestion and first Python chunking are implemented; no CLI exists.
 
 ## Current work
 
@@ -20,9 +20,16 @@ Codex added `content_sha256` to accepted source records, hashing the exact bytes
 already read. Three tests cover a known digest, repeatability/path independence,
 same-size edits, and newline byte differences. No new dependencies were added.
 
+Fingerprint metadata is published as `9f24312`, pushed with GitHub Actions passing.
+Codex implemented `chunking.py` and 17 additional test cases. Top-level Python
+definitions include decorators; nested definitions/methods stay inside the parent.
+Remaining source is preserved in module chunks. Oversized ranges become flagged
+fragments; parse errors return explicit issues and line-based fallback chunks.
+Reports carry the policy version and max_lines. Documentation records the policy.
+
 ## Verification and publication
 
-- pytest: 33 passed (12 discovery, 21 reading/fingerprint).
+- pytest: 50 passed (12 discovery, 21 reading/fingerprint, 17 chunking).
 - Ruff lint and format checks: passed.
 - Actual GitContext scan: eight selected files, 24 examined entries, partial=False.
 - Actual scan with max_files=2: two selected files, partial=True, file_limit issue.
@@ -34,9 +41,12 @@ same-size edits, and newline byte differences. No new dependencies were added.
 - Actual fingerprint execution: `return True` and `return None` both occupy 11
   bytes, but their SHA-256 values differ. The existing discovery report was reused;
   the reader fingerprinted the actual newly read content.
-- The learner explicitly requested committing and pushing fingerprint changes.
-  This status accompanies that commit; the session handoff records the final hash,
-  push result, and remote CI outcome.
+- Actual Python chunking run: seven Python files, 97 chunks, zero parse issues.
+  Joining each file's chunks reproduced its exact source. In reading.py,
+  read_sources became two flagged fragments spanning lines 52–131 and 132–135.
+- The learner explicitly requested committing and pushing Python chunking after
+  the walkthrough. This status accompanies that commit; the session handoff
+  records its identifier, push result, and remote CI outcome.
 
 ## Learning record
 
@@ -55,14 +65,22 @@ The learner correctly answered that file size alone cannot detect changing
 The learner also correctly answered that differently named files with identical
 bytes share a content hash, then requested publication and the next step.
 
+The learner correctly answered that a function chunk should include its decorator.
+The learner was given the explanation of context lost by splitting validation from
+persistence; independent reasoning on that trade-off remains unverified. Codex
+implemented all chunking code and tests.
+The learner requested publication without answering the fragment follow-up.
+Codex explained that one fragment cannot establish the whole function's behavior;
+independent reasoning about this limitation remains unverified.
+
 ## Limitations and next task
 
 The implementation and actual scan were explained. The follow-up distinction
 between expected exclusions and limit-induced partial results remains a learning
 gap; publication was explicitly requested without answering that question.
-The fingerprint walkthrough and follow-up check are complete. Next: explain Python
-AST chunking, propose a first policy for source coverage and line ranges, show an
-example, and ask one understanding question. Wait before implementing chunking.
+Python walkthrough is complete. Next: explain Markdown heading-based chunks,
+exact source coverage, and ignoring heading-like text inside fenced code blocks.
+Ask one understanding question and wait before implementing Markdown chunking.
 Persistence, Git metadata, freshness checking, and search remain separate steps.
 
 Discovery does not inspect content, detect all secrets, honor `.gitignore`, or
@@ -70,7 +88,9 @@ provide an atomic snapshot. Limited selection follows filesystem order. Reading
 requires macOS/Linux, supports UTF-8 only, and does not guarantee an immutable
 whole-repository snapshot. Hash persistence, Git version metadata, and automated
 freshness detection remain future work.
-No CLI, chunking, indexing, retrieval, model integration, or
+Python chunks may be whitespace-only; line limits do not bound tokens, and methods
+are not separate chunks. No Markdown chunking, chunk IDs, CLI, persisted indexing,
+retrieval, model integration, or
 formal evaluation dataset exists. Tests do not demonstrate retrieval quality.
 
 Python 3.12.13 is available. Ollama was installed but not running at inspection;

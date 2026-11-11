@@ -27,6 +27,10 @@ file fingerprints are implemented and tested. We are entering milestone 2 with
 Python chunking next. Ingestion is currently exposed through Python functions;
 the user-facing CLI remains future work, with the lexical search milestone.
 
+Progress on November 10: first Python AST chunking policy implemented locally and
+tested. The next chunking component is Markdown section handling; snapshots and
+persistence remain later parts of milestone 2.
+
 Deferred: remote cloning, multiple languages/repositories, Git history ingestion,
 target-code execution, autonomous edits, hosted vector databases, paid APIs,
 watchers, authentication, large frontend, premature reranking, and fine-tuning.
