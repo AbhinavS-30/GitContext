@@ -5,7 +5,8 @@ small Python repositories and selected Markdown documentation.
 
 **Status:** bounded file discovery and UTF-8 source reading are implemented as
 Python functions with tests. Python and Markdown chunking are also implemented.
-Persistence, search, and generation are not implemented.
+In-memory snapshot inventories are implemented. Persistence, search, and generation
+are not implemented.
 No CLI exists yet.
 
 ## Planned flow
@@ -151,7 +152,7 @@ Syntax/recursion/value parsing failures produce visible issues and line-based
 Line ranges are one-based and inclusive. Text is sliced from the original source,
 preserving newlines, and carries the file's content hash. Ordered chunks cover the
 source exactly once without overlap. The report records policy version and line
-limit. Snapshot IDs, Git metadata, index persistence, and
+limit. Git metadata, index persistence, and
 freshness comparisons are not implemented yet. Chunk count and passing tests are
 not measurements of retrieval quality.
 
@@ -209,5 +210,44 @@ file hash intentionally invalidates references even for chunks untouched by an e
 elsewhere in that file. IDs identify evidence versions, not functions across edits.
 They are scoped to the selected repository/index; two repositories with identical
 relative paths, content, and configuration can share IDs. Snapshot identity will
-provide collection context later. The helper does not validate data against disk,
+provides collection context in the in-memory snapshot. The helper does not validate data against disk,
 detect staleness, persist anything, or prove code safety or answer correctness.
+
+## In-memory snapshot inventory
+
+```python
+from pathlib import Path
+from gitcontext.snapshots import build_snapshot
+
+snapshot = build_snapshot(Path("/path/to/local/repository"))
+print(snapshot.snapshot_id)
+print(snapshot.manifest.partial, snapshot.manifest.degraded)
+for file in snapshot.manifest.files:
+    print(file.path, file.content_sha256, file.chunk_ids)
+```
+
+`build_snapshot` composes discovery, reading, Python/Markdown chunking, and chunk
+identification. The manifest records selected paths separately from successfully
+read files, including empty files. File records contain actual read sizes, hashes,
+and ordered chunk IDs. `snapshot.chunks` associates IDs with exact source chunks.
+Configuration records resource limits, allowlists/excluded directories, versioned
+discovery/reading/chunking policies, chunk ID version, and Python parser runtime.
+Changes to hard-coded filename policies require a discovery policy version bump.
+
+`partial=True` means discovery or reading missed source. `degraded=True` means
+chunking reported an issue while retaining source, such as syntax fallback or an
+unclosed Markdown fence. Expected exclusions alone set neither flag. Issues remain
+visible; a snapshot is not a declaration that retrieval is good or input is safe.
+
+The `snapshot-v1:` ID hashes a canonical, sorted manifest inventory. Absolute root
+paths and diagnostic wording are excluded from identity; issue paths/reasons are
+included. Timestamps and random values are not used. Identical inventories and
+configuration can share IDs across local folders. Configuration, selected files,
+read hashes, issues, and completeness changes can change IDs. This identifies a
+processing inventory, not a globally unique repository or an atomic Git snapshot.
+
+Nothing is saved to disk. Git commit/dirty metadata, model configuration, persisted
+indexes, and automatic freshness comparisons remain unimplemented. Limited scans
+may select different subsets because discovery follows filesystem order. Indexing
+does not freeze concurrent edits across files. Generated inventories and source
+chunks can contain private code and must remain local when persistence is added.

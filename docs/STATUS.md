@@ -1,6 +1,6 @@
 # Status
 
-Updated: November 11, 2026. Phase 2 of five core phases: chunking and index
+Updated: November 12, 2026. Phase 2 of five core phases: chunking and index
 snapshots. Core ingestion, Python chunking, and Markdown chunking are implemented;
 no CLI exists.
 
@@ -38,9 +38,15 @@ Codex implemented `identities.py` and 18 additional test cases for deterministic
 chunk IDs. IDs bind all source chunk fields and chunking configuration using
 canonical JSON and version-prefixed SHA-256. No new dependencies were added.
 
+Chunk IDs are published as `058bc1c`, pushed with GitHub Actions passing.
+Codex implemented in-memory snapshot orchestration in `snapshots.py` and 18 tests.
+The manifest records selected paths, read file hashes/sizes/chunk references,
+configuration, issues, partial and degraded flags, and a deterministic snapshot ID.
+No disk persistence, Git integration, or new dependencies were added.
+
 ## Verification and publication
 
-- pytest: 86 passed (68 existing cases plus 18 chunk identity cases).
+- pytest: 104 passed (86 existing cases plus 18 snapshot cases).
 - Ruff lint and format checks: passed.
 - Actual GitContext scan: eight selected files, 24 examined entries, partial=False.
 - Actual scan with max_files=2: two selected files, partial=True, file_limit issue.
@@ -60,9 +66,11 @@ canonical JSON and version-prefixed SHA-256. No new dependencies were added.
   were correctly distinguished from the code examples they contain.
 - Actual ID execution: identical a.py inputs twice yielded chunk-v1:c8531b74…;
   identical source at b.py yielded chunk-v1:8e9d967d…. No file execution occurred.
-- The learner explicitly requested committing and pushing all pending changes.
-  This status accompanies the chunk ID commit; the session handoff records its
-  identifier, push result, and remote CI outcome.
+- Actual snapshot run before documentation updates: 18 selected/read files, 196
+  chunks, partial=False, degraded=False. Repeated fixture builds shared an ID;
+  editing True to None changed it without Git or a size change.
+- The learner requested progressing and committing/pushing. This status accompanies
+  the snapshot commit; the session handoff records its ID, push, and remote CI result.
 
 ## Learning record
 
@@ -101,15 +109,19 @@ implemented all identity code and tests.
 Codex explained that max_lines changes IDs even for unchanged short chunks because
 configuration is part of identity. Independent reasoning remains unverified.
 
+The learner requested moving forward after the Git commit/content question. Codex
+explained that commits cannot describe uncommitted file contents. Independent
+reasoning on this topic remains unverified. Codex wrote all snapshot code and tests.
+
 ## Limitations and next task
 
 The implementation and actual scan were explained. The follow-up distinction
 between expected exclusions and limit-induced partial results remains a learning
 gap; publication was explicitly requested without answering that question.
-Chunk ID walkthrough is complete. Next: explain a snapshot manifest as the file,
-hash, chunk, configuration, and completeness inventory of one indexing run. Ask
-why a Git commit alone cannot describe indexed uncommitted contents, and wait
-before implementing snapshot metadata. Git integration is a separate small step.
+Next: walk through build_snapshot and the distinction between partial and degraded.
+Ask whether a syntax-error file retained through fallback should vanish from the
+manifest. Wait before implementing the next component: read-only Git metadata.
+Safe persistence and freshness checks remain separate later steps.
 Persistence, Git metadata, freshness checking, and search remain separate steps.
 
 Discovery does not inspect content, detect all secrets, honor `.gitignore`, or
@@ -121,7 +133,8 @@ Python chunks may be whitespace-only; line limits do not bound tokens, and metho
 are not separate chunks. Markdown is a limited ATX/fence subset: no setext heading,
 HTML-block, indented-code-state, or nested-container parsing. Fragment limits may
 split code examples. Chunk IDs are index-scoped and bind whole-file versions, not
-stable symbols across edits. No snapshot IDs, CLI, persisted indexing,
+stable symbols across edits. Snapshot IDs describe the processing inventory and
+configuration, not immutable repository state. No CLI, persisted indexing,
 retrieval, model integration, or
 formal evaluation dataset exists. Tests do not demonstrate retrieval quality.
 

@@ -39,6 +39,11 @@ Progress on November 11: deterministic, versioned chunk ID computation is implem
 locally and tested. Snapshot metadata, Git context, persistence, and freshness
 comparison remain unfinished parts of milestone 2.
 
+Progress on November 12: in-memory snapshot orchestration and manifests are
+implemented and tested, including selected/read inventories, configuration,
+issues, chunk references, deterministic snapshot IDs, and completeness flags.
+Next: Git context, safe persistence, and explicit freshness comparison in small steps.
+
 Deferred: remote cloning, multiple languages/repositories, Git history ingestion,
 target-code execution, autonomous edits, hosted vector databases, paid APIs,
 watchers, authentication, large frontend, premature reranking, and fine-tuning.

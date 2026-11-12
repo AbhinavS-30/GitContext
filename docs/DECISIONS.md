@@ -124,3 +124,27 @@ The entire file hash deliberately makes all its chunk IDs change after any file
 edit. Prefer that conservative version binding over tracking symbols across edits.
 IDs are scoped to an index, not globally unique repository identities. Collection
 snapshot context and persistence remain later work. No dependencies are added.
+
+## 2026-11-12: in-memory snapshot manifest
+
+Compose the existing functions in build_snapshot rather than requiring callers to
+assemble unrelated reports. Separate the manifest (inventory/configuration) from
+identified source chunks. Keep selected paths and successful files distinct so
+unreadable files do not disappear from the record. Include empty files even though
+they have no chunks. Store exact chunk references in each file record.
+
+Record discovery limits, total-read budget, line limit, allowlists/exclusions,
+versioned policies, chunk ID version, and Python parser runtime. Hard-coded policy
+changes must bump their policy version. No embeddings exist, so no embedding
+configuration is invented. Git metadata and disk persistence are separate steps.
+
+Hash the canonical manifest with sorted files, selected paths, and issue reasons.
+Retain diagnostic details for inspection but exclude their wording and the absolute
+root from identity to avoid machine-dependent IDs. IDs are collection identities
+within this tool's scope; identical inventories/configuration can match across roots.
+Expected skipped files are part of the reported inventory, so changes to excluded
+entries can change this ID; it is not yet a relevant-scope freshness comparison.
+
+Use partial for missed discovery/read content and degraded for chunker warnings
+with retained source. Full rebuild orchestration remains in memory. No atomic
+repository snapshot or persistent completion guarantee is claimed.
