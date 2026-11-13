@@ -5,8 +5,8 @@ small Python repositories and selected Markdown documentation.
 
 **Status:** bounded file discovery and UTF-8 source reading are implemented as
 Python functions with tests. Python and Markdown chunking are also implemented.
-In-memory snapshot inventories are implemented. Persistence, search, and generation
-are not implemented.
+In-memory snapshot inventories and read-only Git context are implemented.
+Persistence, search, and generation are not implemented.
 No CLI exists yet.
 
 ## Planned flow
@@ -152,9 +152,8 @@ Syntax/recursion/value parsing failures produce visible issues and line-based
 Line ranges are one-based and inclusive. Text is sliced from the original source,
 preserving newlines, and carries the file's content hash. Ordered chunks cover the
 source exactly once without overlap. The report records policy version and line
-limit. Git metadata, index persistence, and
-freshness comparisons are not implemented yet. Chunk count and passing tests are
-not measurements of retrieval quality.
+limit. Index persistence and freshness comparisons are not implemented yet.
+Chunk count and passing tests are not measurements of retrieval quality.
 
 ## Markdown chunking
 
@@ -239,15 +238,44 @@ chunking reported an issue while retaining source, such as syntax fallback or an
 unclosed Markdown fence. Expected exclusions alone set neither flag. Issues remain
 visible; a snapshot is not a declaration that retrieval is good or input is safe.
 
-The `snapshot-v1:` ID hashes a canonical, sorted manifest inventory. Absolute root
+The `snapshot-v2:` ID hashes a canonical, sorted manifest inventory. Absolute root
 paths and diagnostic wording are excluded from identity; issue paths/reasons are
 included. Timestamps and random values are not used. Identical inventories and
 configuration can share IDs across local folders. Configuration, selected files,
 read hashes, issues, and completeness changes can change IDs. This identifies a
 processing inventory, not a globally unique repository or an atomic Git snapshot.
 
-Nothing is saved to disk. Git commit/dirty metadata, model configuration, persisted
-indexes, and automatic freshness comparisons remain unimplemented. Limited scans
+Snapshot data is not saved to disk. Model configuration, persisted indexes, and
+automatic freshness comparisons remain unimplemented. Limited scans
 may select different subsets because discovery follows filesystem order. Indexing
 does not freeze concurrent edits across files. Generated inventories and source
 chunks can contain private code and must remain local when persistence is added.
+
+## Read-only Git context
+
+`manifest.git` records `status`, `commit`, `dirty`, and an optional issue code.
+`available` means Git inspection succeeded; `not_repository` means the selected
+folder is not itself a working-tree root; `unavailable` means inspection failed.
+Unknown dirty state is `None`, never silently `False`. Repositories without a
+resolvable HEAD have no commit and an explicit `head_unavailable` issue. In an
+empty repository, dirty=False means status has no entries, not that a commit exists.
+
+Dirty includes staged/unstaged tracked changes and untracked non-ignored files
+across the repository, not only indexed Python/Markdown. Ignored files and unstaged
+changes inside submodule worktrees are excluded. Indexed source can therefore
+change while dirty stays False (for example an indexed Git-ignored Markdown file);
+file hashes remain the source-content authority. Ancestor repository metadata is
+not attributed to a selected subfolder. Linked worktrees are supported by Git's
+normal root discovery; bare repositories are not working-tree roots.
+
+Inspection runs only fixed read-only Git commands, without a shell or network.
+It clears inherited GIT_* overrides, disables filesystem-monitor helpers and
+optional index locks, and suppresses interactive prompting. Each command has a
+five-second timeout; stdout is temporarily spooled and accepted only up to 64 KiB.
+This bounds accepted output/memory, not temporary spool size during the timeout.
+No target code, hooks, package installation, or remote access is requested.
+
+Git context is observed after source processing. It does not prove an atomic read
+or that the indexed bytes match HEAD. The manifest includes this observation and
+its policy; changing Git context can change snapshot IDs even when chunk contents
+are unchanged. Source-completeness flags remain independent of Git availability.

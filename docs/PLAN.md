@@ -44,6 +44,10 @@ implemented and tested, including selected/read inventories, configuration,
 issues, chunk references, deterministic snapshot IDs, and completeness flags.
 Next: Git context, safe persistence, and explicit freshness comparison in small steps.
 
+Progress on November 13: read-only Git commit/dirty observations are implemented
+locally and tested, including unavailable states and snapshot-v2 integration.
+Next: safe persistence, then explicit refresh/freshness checks. Phase 2 continues.
+
 Deferred: remote cloning, multiple languages/repositories, Git history ingestion,
 target-code execution, autonomous edits, hosted vector databases, paid APIs,
 watchers, authentication, large frontend, premature reranking, and fine-tuning.

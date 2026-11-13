@@ -148,3 +148,23 @@ entries can change this ID; it is not yet a relevant-scope freshness comparison.
 Use partial for missed discovery/read content and degraded for chunker warnings
 with retained source. Full rebuild orchestration remains in memory. No atomic
 repository snapshot or persistent completion guarantee is claimed.
+
+## 2026-11-13: read-only Git observation
+
+Record GitMetadata in the manifest after source processing: inspection status,
+resolved commit when available, tri-state dirty, and explicit issue code. Bump the
+snapshot schema/ID prefix to snapshot-v2 and include Git context in its identity.
+Chunk IDs are unaffected. Source flags do not claim Git inspection success.
+
+Use fixed subprocess argument lists without a shell or network. Clear inherited
+GIT_* settings, avoid global/system config, disable local fsmonitor helpers and
+optional index locking, and use timeouts. Spool stdout to avoid unbounded memory,
+then reject outputs over 64 KiB; spool storage during the five-second timeout is
+not byte-capped. No repository helpers or hooks should run. Tests verify that a
+configured fsmonitor helper is not invoked and index bytes stay unchanged.
+
+Require the exact working-tree root, not an ancestor. Non-Git folders remain valid
+source targets. Dirty considers tracked and untracked non-ignored files, but not
+unstaged submodule-worktree changes. An unresolved HEAD (including unborn repos)
+is explicit; unknown dirty is None. Git state is observed once, not evidence that
+all files match a commit or stayed unchanged across indexing. Keep file hashes.

@@ -31,7 +31,7 @@ def test_build_connects_inventory_to_exact_source_and_chunk_references(tmp_path)
         )
     assert snapshot.manifest.files[-1].chunk_ids == ()
     assert snapshot.manifest.config.max_lines == 80
-    assert asdict(snapshot.manifest)["schema_version"] == "snapshot-v1"
+    assert asdict(snapshot.manifest)["schema_version"] == "snapshot-v2"
 
 
 def test_repeatable_across_roots_and_creation_order(tmp_path):

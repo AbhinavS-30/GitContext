@@ -14,11 +14,12 @@ from gitcontext.discovery import (
     DiscoveryLimits,
     discover_repository,
 )
+from gitcontext.git_metadata import GitMetadata, inspect_git
 from gitcontext.identities import CHUNK_ID_VERSION, chunk_id
 from gitcontext.markdown import MARKDOWN_CHUNKING_VERSION, chunk_markdown
 from gitcontext.reading import read_sources
 
-SNAPSHOT_VERSION = "snapshot-v1"
+SNAPSHOT_VERSION = "snapshot-v2"
 
 
 @dataclass(frozen=True)
@@ -33,6 +34,7 @@ class SnapshotConfig:
     python_policy: str = PYTHON_CHUNKING_VERSION
     markdown_policy: str = MARKDOWN_CHUNKING_VERSION
     chunk_id_version: str = CHUNK_ID_VERSION
+    git_policy: str = "exact-root-status-no-submodule-worktrees-v1"
     parser_runtime: str = sys.version.split()[0]
 
 
@@ -53,6 +55,7 @@ class SnapshotManifest:
     issues: tuple[DiscoveryIssue, ...]
     partial: bool
     degraded: bool
+    git: GitMetadata
 
 
 @dataclass(frozen=True)
@@ -129,6 +132,7 @@ def build_snapshot(
         ),
         partial=reading.partial,
         degraded=degraded,
+        git=inspect_git(discovered.root),
     )
     payload = asdict(manifest)
     # Diagnostics can contain machine-specific paths or OS wording; retain them in
