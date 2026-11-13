@@ -52,6 +52,16 @@ Validated JSON snapshot saving/loading is implemented with private temporary
 siblings, verification, and atomic replacement. Pydantic is added for boundary
 validation. Next: explicit freshness comparison and refresh behavior, then the CLI.
 
+Explicit freshness comparison is implemented locally and tested, including content,
+supported-scope/configuration changes, unknown inspection, and partial baselines.
+Next: expose explicit rebuild/refresh and status through a minimal CLI, then add
+lexical search in milestone 3. No search or CLI is implemented yet.
+
 Deferred: remote cloning, multiple languages/repositories, Git history ingestion,
 target-code execution, autonomous edits, hosted vector databases, paid APIs,
 watchers, authentication, large frontend, premature reranking, and fine-tuning.
+
+Phase 2 exit check: a minimal CLI can build/save, inspect, check freshness, and
+explicitly rebuild/refresh snapshots. Failures preserve the old saved snapshot and
+cannot masquerade as complete results. Verify tests and an actual end-to-end run.
+Announce Phase 2 completion explicitly to the learner once those checks pass.

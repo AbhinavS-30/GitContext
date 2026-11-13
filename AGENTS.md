@@ -43,3 +43,6 @@ For subsequent components, commit and push meaningful completed work after the
 learner understands it and relevant checks pass. Review staged files for private
 data and local artifacts. Use explicit staging paths. Never force-push, create
 empty streak commits, purchase services, or silently switch to cloud models.
+
+The learner requested an explicit announcement when Phase 2 is complete. Use the
+exit checks in docs/PLAN.md; do not declare completion before those checks pass.

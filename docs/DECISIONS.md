@@ -187,3 +187,21 @@ data local and ignored. This is a saved source snapshot, not yet a search index.
 Destination directories are trusted; this component does not implement concurrent
 writer locking, directory-fsync power-loss guarantees, authentication, or automatic
 freshness checking. A killed process may leave an unpublished temporary sibling.
+
+## 2026-11-13: explicit source freshness comparison
+
+Discover/read/hash again without rebuilding chunks, inspecting Git, or saving.
+Compare supported selected paths, read content hashes, and processing configuration
+against the saved snapshot. Reuse saved limits unless explicitly overridden, but
+construct current policy/runtime configuration so drift is visible.
+
+Use current/stale/unknown. Unknown takes precedence if either source inventory is
+partial or inspection cannot establish scope. Retain observed changes alongside
+unknown, and never infer removal from incomplete discovery. Removed refers to
+supported scope, not necessarily filesystem deletion. Expected skipped artifacts
+and Git observation changes alone do not determine source freshness.
+
+Keep degraded separate: unchanged fallback text can be current without being
+structurally parsed. Partial snapshots require an explicit rebuild to establish a
+complete baseline. Require an explicit root matching saved location; do not silently
+read a different folder. Freshness remains a non-atomic observation, not a watcher.

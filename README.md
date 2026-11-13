@@ -120,7 +120,7 @@ Each accepted source record includes `content_sha256`, a 64-character hexadecima
 SHA-256 fingerprint of the exact bytes read. The hash uses those in-memory bytes,
 not a second file read. Paths and timestamps do not affect it; newline and other
 byte changes do. Hashes are saved when a snapshot is explicitly persisted;
-automatic stale-index detection does not exist yet. A hash does not
+explicit freshness comparison uses those hashes. A hash does not
 establish that source text is safe or correct.
 
 ## Python chunking
@@ -154,7 +154,7 @@ Syntax/recursion/value parsing failures produce visible issues and line-based
 Line ranges are one-based and inclusive. Text is sliced from the original source,
 preserving newlines, and carries the file's content hash. Ordered chunks cover the
 source exactly once without overlap. The report records policy version and line
-limit. Freshness comparisons are not implemented yet.
+limit. Explicit freshness comparison is available below.
 Chunk count and passing tests are not measurements of retrieval quality.
 
 ## Markdown chunking
@@ -248,8 +248,8 @@ read hashes, issues, and completeness changes can change IDs. This identifies a
 processing inventory, not a globally unique repository or an atomic Git snapshot.
 
 Snapshot data can be explicitly saved using the persistence functions below.
-Model configuration, search indexes, and automatic freshness comparisons remain
-unimplemented. Limited scans
+Model configuration and search indexes remain unimplemented. Freshness checks
+require an explicit call; no background watcher runs. Limited scans
 may select different subsets because discovery follows filesystem order. Indexing
 does not freeze concurrent edits across files. Generated inventories and source
 chunks can contain private code and must remain local.
@@ -310,6 +310,39 @@ writers are last-writer-wins; locking is not implemented. Use a trusted local
 destination directory that already exists; loading refuses a final-file symlink.
 
 Partial/degraded snapshots retain their flags. Successfully loading an old snapshot
-does not make it current: freshness detection is still the next component. Snapshot
+does not make it current: run the explicit freshness check below. Snapshot
 JSON includes source text, absolute repository location, and diagnostics; keep it
 in ignored `.gitcontext/` or another private location. Do not commit generated data.
+
+## Explicit freshness comparison
+
+```python
+from gitcontext.freshness import check_freshness
+
+freshness = check_freshness(restored, Path("/path/to/local/repository"))
+print(freshness.status)
+print(freshness.added, freshness.modified, freshness.removed)
+print(freshness.config_changes, freshness.limitations)
+```
+
+The check discovers and reads supported files again, comparing selected paths,
+actual content hashes, and current processing configuration. It does not reparse
+source, invoke Git, write data, or refresh the saved snapshot. It accepts snapshots
+from build_snapshot/load_snapshot and requires the explicit root to match the saved
+root. Defaults use saved resource limits; optional limit overrides are compared as
+configuration changes. Current policy versions and parser runtime are compared too.
+
+`current` means complete observations match. `stale` means supported scope, bytes,
+or configuration differ. `unknown` means a saved/current observation is partial,
+the root differs/is unavailable, or inspection failed. Unknown takes precedence
+over stale, while any observed added/modified differences remain visible. Removed
+paths are only reported after complete discovery, so failed traversal does not
+invent deletions. Removed means absent from supported scope: a file replaced by an
+excluded symlink is removed from scope even if that path still exists.
+
+Expected exclusions and unrelated Git commit/dirty changes do not by themselves
+make source stale. An unchanged syntax-fallback snapshot may be current and still
+degraded; current does not mean high quality. A saved partial snapshot cannot be
+certified current; an explicit rebuild is needed. This is a bounded observation,
+not a guarantee against concurrent edits or future changes. Automatic query-time
+enforcement and a user-facing refresh command await the CLI/search components.
