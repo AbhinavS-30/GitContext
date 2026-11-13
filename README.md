@@ -6,7 +6,8 @@ small Python repositories and selected Markdown documentation.
 **Status:** bounded file discovery and UTF-8 source reading are implemented as
 Python functions with tests. Python and Markdown chunking are also implemented.
 In-memory snapshot inventories and read-only Git context are implemented.
-Persistence, search, and generation are not implemented.
+Validated local snapshot saving/loading is implemented. Search and generation
+are not implemented.
 No CLI exists yet.
 
 ## Planned flow
@@ -37,7 +38,8 @@ python -c 'import gitcontext; print(gitcontext.__doc__)'
 
 The last command checks this package's installation, not a target repository.
 Development tools and the build backend are pinned in `pyproject.toml`; there are
-no application dependencies yet. No model download is required for setup.
+Pydantic is the application dependency for persisted-data validation. No model
+download is required for setup.
 
 ## Scope and limitations
 
@@ -117,8 +119,8 @@ reading is accepted if it meets current limits.
 Each accepted source record includes `content_sha256`, a 64-character hexadecimal
 SHA-256 fingerprint of the exact bytes read. The hash uses those in-memory bytes,
 not a second file read. Paths and timestamps do not affect it; newline and other
-byte changes do. This metadata prepares for later freshness checks, but no hashes
-are persisted and no automatic stale-index detection exists yet. A hash does not
+byte changes do. Hashes are saved when a snapshot is explicitly persisted;
+automatic stale-index detection does not exist yet. A hash does not
 establish that source text is safe or correct.
 
 ## Python chunking
@@ -152,7 +154,7 @@ Syntax/recursion/value parsing failures produce visible issues and line-based
 Line ranges are one-based and inclusive. Text is sliced from the original source,
 preserving newlines, and carries the file's content hash. Ordered chunks cover the
 source exactly once without overlap. The report records policy version and line
-limit. Index persistence and freshness comparisons are not implemented yet.
+limit. Freshness comparisons are not implemented yet.
 Chunk count and passing tests are not measurements of retrieval quality.
 
 ## Markdown chunking
@@ -245,11 +247,12 @@ configuration can share IDs across local folders. Configuration, selected files,
 read hashes, issues, and completeness changes can change IDs. This identifies a
 processing inventory, not a globally unique repository or an atomic Git snapshot.
 
-Snapshot data is not saved to disk. Model configuration, persisted indexes, and
-automatic freshness comparisons remain unimplemented. Limited scans
+Snapshot data can be explicitly saved using the persistence functions below.
+Model configuration, search indexes, and automatic freshness comparisons remain
+unimplemented. Limited scans
 may select different subsets because discovery follows filesystem order. Indexing
 does not freeze concurrent edits across files. Generated inventories and source
-chunks can contain private code and must remain local when persistence is added.
+chunks can contain private code and must remain local.
 
 ## Read-only Git context
 
@@ -279,3 +282,34 @@ Git context is observed after source processing. It does not prove an atomic rea
 or that the indexed bytes match HEAD. The manifest includes this observation and
 its policy; changing Git context can change snapshot IDs even when chunk contents
 are unchanged. Source-completeness flags remain independent of Git availability.
+
+## Local snapshot persistence
+
+```python
+from gitcontext.persistence import save_snapshot, load_snapshot
+
+storage = Path(".gitcontext")
+storage.mkdir(exist_ok=True)
+save_snapshot(snapshot, storage / "snapshot.json")
+restored = load_snapshot(storage / "snapshot.json")
+```
+
+Pydantic validates the saved JSON structure strictly. Additional checks recompute
+snapshot/chunk IDs, reconstruct exact file contents to check hashes and sizes,
+verify contiguous source line coverage, and reject duplicate/missing/unreferenced
+chunks. Unknown/omitted fields and unsupported schema or chunk-policy versions
+are rejected. Load/save accept at most 64,000,000 serialized bytes. This is
+consistency validation, not authentication or proof that data matches current disk.
+
+Saving validates first, writes a private (0600) temporary sibling, flushes and
+fsyncs it, verifies it by loading, then atomically replaces the destination. Failures
+before replacement preserve the previous file; temporary files are cleaned up on
+handled failures. A process killed abruptly can leave a temporary sibling. This
+does not promise power-loss durability of the containing directory. Concurrent
+writers are last-writer-wins; locking is not implemented. Use a trusted local
+destination directory that already exists; loading refuses a final-file symlink.
+
+Partial/degraded snapshots retain their flags. Successfully loading an old snapshot
+does not make it current: freshness detection is still the next component. Snapshot
+JSON includes source text, absolute repository location, and diagnostics; keep it
+in ignored `.gitcontext/` or another private location. Do not commit generated data.

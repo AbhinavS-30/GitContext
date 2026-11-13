@@ -168,3 +168,22 @@ source targets. Dirty considers tracked and untracked non-ignored files, but not
 unstaged submodule-worktree changes. An unresolved HEAD (including unborn repos)
 is explicit; unknown dirty is None. Git state is observed once, not evidence that
 all files match a commit or stayed unchanged across indexing. Keep file hashes.
+
+## 2026-11-13: validated JSON persistence
+
+Add pinned Pydantic 2.12.4 to validate strict nested dataclass JSON through a
+TypeAdapter. Keep existing internal dataclasses. Compare the input JSON shape to
+its validated serialization to reject unknown/omitted fields that dataclass
+adapters would otherwise ignore/default. Validate semantic consistency separately:
+IDs, references, reconstructed file hashes/sizes, and contiguous line ranges.
+Extract snapshot_id(manifest) so builder and loader use one identity algorithm.
+
+Use one bounded JSON file (64 MB serialized), not pickle or multiple coordinated
+files. Validate before writing, create a private sibling, flush/fsync, load-verify,
+and os.replace. Preserve the old destination on pre-replacement failures. Record
+partial/degraded state without silently promoting it to complete. Keep generated
+data local and ignored. This is a saved source snapshot, not yet a search index.
+
+Destination directories are trusted; this component does not implement concurrent
+writer locking, directory-fsync power-loss guarantees, authentication, or automatic
+freshness checking. A killed process may leave an unpublished temporary sibling.

@@ -6,7 +6,8 @@ Updated: November 13, 2026. Phase 2 of five core phases: chunking and index snap
 
 Bounded discovery, bounded UTF-8 reading, file hashes, exact Python/Markdown chunks,
 deterministic chunk IDs, and in-memory snapshot manifests are implemented.
-Snapshot orchestration is published as `d2832ca`, pushed with GitHub Actions passing.
+Snapshot orchestration is published as `d2832ca`; Git metadata as `2fbb80e`.
+Both were pushed with GitHub Actions passing.
 Earlier steps and their publication records are available in Git history.
 
 Codex added read-only Git inspection in `git_metadata.py`, 15 test cases, and
@@ -16,9 +17,15 @@ write to the Git index, invoke repository helpers, or access remotes. Git contex
 is observed after reading, not a guarantee that source matches HEAD. Documentation
 and decisions describe dirty scope, subprocess bounds, and platform limitations.
 
+Codex implemented validated JSON saving/loading in persistence.py and 17 tests.
+Pydantic 2.12.4 validates strict data structure; semantic checks verify IDs, exact
+file reconstruction, hashes/sizes, and line ranges/references. Saving uses a private
+verified sibling and atomic replacement. snapshot_id was extracted for shared use.
+Partial/degraded flags survive roundtrips. No freshness or search was added.
+
 ## Checks and actual execution
 
-- pytest: 119 passed (104 existing cases plus 15 Git metadata cases).
+- pytest: 136 passed (119 existing cases plus 17 persistence cases).
 - Ruff lint and formatting: passed. Git diff whitespace check: passed.
 - Actual GitContext inspection: available, commit d2832ca…, dirty=True with local
   implementation edits. Snapshot-v2 recorded that context; partial=False and
@@ -27,9 +34,13 @@ and decisions describe dirty scope, subprocess bounds, and platform limitations.
   non-Git folders, ancestor rejection, inherited environment overrides, missing
   Git, timeouts, excessive output, status failure, index immutability, and a
   configured filesystem-monitor helper that must not execute.
-- The learner explicitly requested committing and pushing Git integration after
-  the walkthrough. This status accompanies that commit; the session handoff records
-  its identifier, push result, and remote CI outcome.
+- Actual persistence fixture: initial snapshot roundtripped exactly; simulated
+  replacement failure preserved the old snapshot; a successful retry replaced it.
+- Tests also interrupt a write halfway through and verify old bytes survive, plus
+  fsync/verification failures, malformed JSON, wrong schema/IDs/types, broken
+  references, content inconsistencies, size limits, and symlink refusal.
+- The learner requested progressing and publication. This status accompanies the
+  persistence commit; the session handoff records its ID, push, and remote CI result.
 
 ## Learning record
 
@@ -39,7 +50,10 @@ edits; identical bytes share a hash; decorators belong with functions; syntax-er
 source should remain with a fallback warning; and commit IDs alone cannot describe
 indexed uncommitted edits. The learner correctly answered that a failed Git status
 inspection requires dirty=None, not False. Codex implemented all components and
-tests so far.
+tests so far. The learner initially thought a failed refresh should remove the
+old snapshot. After correction, the learner correctly identified changed source
+as stale; the preserve-old-file reasoning was explained but not independently
+restated. Codex implemented persistence and tests.
 
 Explanations were provided, but independent reasoning remains unverified, for:
 expected exclusions versus missed source, strict decoding versus silent repair,
@@ -49,13 +63,12 @@ The learner has not yet independently written implementation code.
 
 ## Limitations and next small task
 
-The GitMetadata walkthrough and follow-up check are complete. Next: explain safe
-snapshot persistence with a temporary sibling file and atomic replacement, plus
-validation before publication. Ask what should happen to the previous valid saved
-snapshot if a new write fails, and wait before implementation. Freshness checks
-follow persistence.
+Walk through save_snapshot/load_snapshot and the actual failure/retry fixture.
+Explain that valid saved data can still be stale. Next: freshness comparison of
+supported paths/content and configuration, preserving unknown/error states.
+Ask one understanding question and wait before implementing freshness checks.
 
-No CLI, disk persistence, automatic freshness comparison, retrieval, embeddings,
+No CLI, automatic freshness comparison, retrieval, embeddings,
 model inference, API, or formal evaluation dataset exists. Tests are not evidence
 of retrieval quality. Reading/Git inspection target macOS/Linux. Discovery cannot
 promise secret detection; limited traversal can select different subsets. Python
@@ -71,3 +84,9 @@ IDs while chunk IDs remain source/configuration based.
 
 Python 3.12.13 is available. Ollama was installed but not running at initial
 inspection; llama3.2:3b had a manifest. Inference and embeddings remain unverified.
+
+Persistence uses a trusted pre-existing local directory and a 64 MB serialized
+file bound. No concurrent writer lock, directory-fsync power-loss guarantee, or
+snapshot authentication is implemented. Abrupt termination can leave a temporary
+sibling. Keep saved source snapshots in ignored .gitcontext or another private
+location. Loading does not read target source and cannot certify freshness.

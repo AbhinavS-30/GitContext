@@ -134,6 +134,11 @@ def build_snapshot(
         degraded=degraded,
         git=inspect_git(discovered.root),
     )
+    return Snapshot(snapshot_id(manifest), discovered.root, manifest, tuple(chunks))
+
+
+def snapshot_id(manifest: SnapshotManifest) -> str:
+    """Recompute manifest identity without consulting disk or Git."""
     payload = asdict(manifest)
     # Diagnostics can contain machine-specific paths or OS wording; retain them in
     # the manifest but identify issue paths/reasons only, independent of wording.
@@ -144,5 +149,4 @@ def build_snapshot(
     encoded = json.dumps(
         payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False
     ).encode("utf-8")
-    reference = f"{SNAPSHOT_VERSION}:{hashlib.sha256(encoded).hexdigest()}"
-    return Snapshot(reference, discovered.root, manifest, tuple(chunks))
+    return f"{SNAPSHOT_VERSION}:{hashlib.sha256(encoded).hexdigest()}"
