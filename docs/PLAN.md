@@ -72,3 +72,8 @@ refresh → current status. It also verified unknown status and refused partial 
 without replacing valid saved data. Publication status is tracked in docs/STATUS.md.
 Next is milestone 3: explain and implement the lexical retrieval baseline in small
 steps, retaining freshness enforcement and traceable evidence.
+
+Phase 2 is published as 88acbb9 with passing CI. Phase 3 has begun with the shared
+identifier-aware tokenizer. Next: explain and implement a transparent lexical
+ranking baseline, then freshness-enforced CLI search. No retrieval quality has
+been measured and no formal question set has been created.

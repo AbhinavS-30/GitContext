@@ -9,6 +9,7 @@ In-memory snapshot inventories and read-only Git context are implemented.
 Validated local snapshot saving/loading is implemented. Search and generation
 are not implemented.
 The CLI supports explicit snapshot indexing, inspection, status, and refresh.
+A shared lexical tokenizer is implemented; ranking/search is still forthcoming.
 
 For a component-by-component explanation, see [the walkthrough](docs/WALKTHROUGH.md).
 
@@ -388,3 +389,27 @@ degraded; current does not mean high quality. A saved partial snapshot cannot be
 certified current; an explicit rebuild is needed. This is a bounded observation,
 not a guarantee against concurrent edits or future changes. Automatic query-time
 enforcement awaits the search component. The CLI provides explicit status/refresh.
+
+## Lexical tokenization (Phase 3 in progress)
+
+```python
+from gitcontext.tokenization import tokenize
+
+print(tokenize("save_reviewed_record"))
+# ('save_reviewed_record', 'save', 'reviewed', 'record')
+```
+
+Policy `code-words-v1` preserves a case-folded full word/identifier plus underscore
+and ASCII CamelCase/acronym parts. Unicode word characters are retained and case
+folded; general Unicode camel segmentation and language-specific word boundaries
+are not implemented. Digits stay attached to word parts and numeric terms remain
+searchable. Punctuation separates words; underscore-only and empty inputs yield
+no terms. Leading/trailing underscores remain in full identifiers such as __init__.
+
+Repeated source occurrences remain repeated, while duplicate expansions within
+one occurrence are emitted once. Normalized full identifiers support future exact
+name matching; split parts support prose queries. Exact here is case-insensitive,
+not a byte-for-byte source comparison. No stemming, stopword removal, synonym
+inference, scores, persisted lexical index, or search command is implemented yet.
+Queries and chunks will use the same policy when retrieval is added. Tokenizer
+examples/tests are development checks, not a formal retrieval benchmark.

@@ -1,7 +1,7 @@
 # Status
 
-Updated: November 16, 2026. Phase 2 implementation complete locally.
-Next: Phase 3 of five core phases, lexical CLI search.
+Updated: November 16, 2026. Phase 2 complete and published as 88acbb9 with passing CI.
+Phase 3 of five core phases is in progress: lexical CLI search.
 
 ## Current implementation
 
@@ -36,9 +36,14 @@ Codex implemented the CLI (index/inspect/status/refresh), console/module entrypo
 complete degraded builds retain visible warnings. Status is read-only. Inspection
 labels evidence as saved and not freshness-checked. No new dependencies were added.
 
+Codex implemented tokenization.py and 17 tests for code-words-v1. It preserves
+case-folded full identifiers and underscore/ASCII camel/acronym parts, handles
+prose/error strings, and preserves occurrence counts without duplicate expansions.
+No dependencies, ranking, persisted lexical index, or CLI search were added.
+
 ## Checks and actual execution
 
-- pytest: 172 passed (159 existing cases plus 13 CLI cases).
+- pytest: 189 passed (172 existing cases plus 17 tokenizer cases).
 - Ruff lint and formatting: passed. Git diff whitespace check: passed.
 - Actual GitContext inspection: available, commit d2832ca…, dirty=True with local
   implementation edits. Snapshot-v2 recorded that context; partial=False and
@@ -59,9 +64,12 @@ labels evidence as saved and not freshness-checked. No new dependencies were add
   exact chunk inspect=0, initial status=current/0, same-size edit status=stale/3,
   refresh=0, status=current/0. Invalid UTF-8 then produced unknown/4 and refresh=4;
   the valid saved snapshot remained byte-for-byte unchanged.
-- The learner explicitly requested committing/pushing the CLI and a detailed
-  system walkthrough. This status accompanies that commit; the session handoff
-  records its identifier, push result, and remote CI outcome.
+- Actual tokenizer run: save_reviewed_record produced the full identifier plus
+  save/reviewed/record; ReviewedRecord produced reviewedrecord/reviewed/record;
+  parseHTTPResponse produced parsehttpresponse/parse/http/response.
+- The learner explicitly requested publication and progression. This status
+  accompanies the tokenizer commit; the session handoff records its identifier,
+  push result, and remote CI outcome.
 - All recorded Phase 2 exit checks passed locally; Phase 2 implementation is complete.
 
 
@@ -88,19 +96,22 @@ fragment context, fenced-code headings, path/configuration-sensitive chunk IDs,
 and the distinction between a run inventory and an atomic repository snapshot.
 The learner has not yet independently written implementation code.
 
+After the detailed system walkthrough, the learner requested progression.
+Codex explained retaining normalized exact identifiers alongside split terms;
+independent reasoning about that trade-off remains unverified. Codex implemented
+the tokenizer and tests. No formal evaluation questions were invented.
+
 ## Limitations and next small task
 
 The learner asked for the status/refresh answer and requested moving forward.
 Codex explained that status should report and wait for explicit refresh. Independent
 reasoning about that interface choice remains unverified. Codex wrote CLI and tests.
 
-Walk through cli.main: parse command → delegate to pipeline function → emit JSON
-and exit code. Review the actual end-to-end run. Ask why status must preserve the
-saved snapshot when it finds stale source. Wait before implementing lexical search.
-The learner requested a detailed review before progressing. docs/WALKTHROUGH.md
-records the architecture, execution flow, trade-offs, and actual verification for
-that review. Phase 2 completion was explicitly announced; Phase 3 is next and not
-implemented yet. Ask one understanding question before implementing lexical search.
+Phase 2 completion is published; docs/WALKTHROUGH.md records the detailed review.
+Next: walk through tokenize, casefold, and the actual outputs. Explain a transparent
+lexical ranking baseline before implementation; ask one understanding question
+about query-term coverage versus repeated occurrences, then wait. Ranking and
+freshness-enforced search CLI remain unimplemented.
 
 No automatic query-time freshness enforcement, retrieval, embeddings,
 model inference, API, or formal evaluation dataset exists. Tests are not evidence
@@ -128,3 +139,7 @@ freshness check does read target source, but cannot freeze concurrent edits or
 certify a saved partial inventory as current. Unknown takes precedence over known
 changes while retaining those changes in the report. Removals need full discovery;
 unchanged degraded snapshots retain their quality limitation.
+
+Tokenizer v1 handles ASCII camel boundaries and retains Unicode words but does not
+segment all languages, infer synonyms, stem, or remove stopwords. Its version is
+available for future retrieval configuration; no persisted lexical data exists yet.

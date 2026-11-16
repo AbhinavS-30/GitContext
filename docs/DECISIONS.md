@@ -225,3 +225,18 @@ Local tests and installed-command execution passed the Phase 2 exit sequence,
 including chunk inspection, stale/unknown status, explicit refresh, and preservation
 after partial refresh. Phase 2 implementation is complete locally; lexical retrieval
 is next, with no claims yet about retrieval or answer quality.
+
+## 2026-11-16: identifier-aware lexical tokenizer
+
+Use a shared, standard-library tokenizer for both questions and source. Keep
+case-folded full identifiers plus underscore/ASCII camel and acronym parts. This
+preserves normalized exact-name matches without requiring a question to contain
+source underscores. Retain numeric tokens and Unicode words, but document that
+Unicode camel segmentation and language-specific boundaries are not implemented.
+
+Preserve occurrence counts across text; deduplicate expansions within an occurrence
+so plain words do not get artificial double frequency. Empty/punctuation-only
+input yields no tokens. Do not remove stopwords, stem, or infer synonyms in v1.
+Record TOKENIZATION_VERSION=code-words-v1 for future retrieval configuration.
+There is no persisted lexical index to invalidate yet, so snapshot schema remains
+unchanged. Ranking and CLI search are separate small steps. No dependency is added.
