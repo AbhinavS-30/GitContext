@@ -17,5 +17,6 @@ jobs:
       - run: ruff check .
       - run: ruff format --check .
       - run: python -m pytest
+      - run: gitcontext --help
       - run: python -m compileall -q src
       - run: python -c 'import gitcontext; print(gitcontext.__doc__)'

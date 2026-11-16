@@ -65,3 +65,10 @@ Phase 2 exit check: a minimal CLI can build/save, inspect, check freshness, and
 explicitly rebuild/refresh snapshots. Failures preserve the old saved snapshot and
 cannot masquerade as complete results. Verify tests and an actual end-to-end run.
 Announce Phase 2 completion explicitly to the learner once those checks pass.
+
+November 16: Phase 2 implementation complete locally. The minimal CLI and tests
+passed; an installed-command run verified index → inspect → edit → stale status →
+refresh → current status. It also verified unknown status and refused partial refresh
+without replacing valid saved data. Publication status is tracked in docs/STATUS.md.
+Next is milestone 3: explain and implement the lexical retrieval baseline in small
+steps, retaining freshness enforcement and traceable evidence.

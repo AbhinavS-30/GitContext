@@ -205,3 +205,23 @@ Keep degraded separate: unchanged fallback text can be current without being
 structurally parsed. Partial snapshots require an explicit rebuild to establish a
 complete baseline. Require an explicit root matching saved location; do not silently
 read a different folder. Freshness remains a non-atomic observation, not a watcher.
+
+## 2026-11-16: thin snapshot CLI and Phase 2 exit
+
+Use standard-library argparse, a console script, and python -m gitcontext. Delegate
+to existing functions instead of duplicating pipeline logic. Emit JSON and stable
+exit codes: 0 success/current, 1 operational error, 2 arguments, 3 stale, 4 unknown
+or partial rebuild refused. Add index/inspect/status/refresh, not search or an API.
+
+Use a fixed .gitcontext/snapshot.json under the explicit repository root, rejecting
+root/storage symlinks. Index refuses an existing file; refresh loads its configuration
+and performs a full rebuild, preserving saved limits unless explicitly overridden.
+Do not publish partial CLI builds; report their issues and keep the previous saved
+snapshot. A complete degraded build can be saved if its warnings remain visible.
+Status never writes. Inspect labels chunks as saved evidence without asserting
+freshness. Target Git tracking remains the user's responsibility; do not edit it.
+
+Local tests and installed-command execution passed the Phase 2 exit sequence,
+including chunk inspection, stale/unknown status, explicit refresh, and preservation
+after partial refresh. Phase 2 implementation is complete locally; lexical retrieval
+is next, with no claims yet about retrieval or answer quality.

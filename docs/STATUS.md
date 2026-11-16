@@ -1,6 +1,7 @@
 # Status
 
-Updated: November 13, 2026. Phase 2 of five core phases: chunking and index snapshots.
+Updated: November 16, 2026. Phase 2 implementation complete locally.
+Next: Phase 3 of five core phases, lexical CLI search.
 
 ## Current implementation
 
@@ -29,9 +30,15 @@ supported scope/content again, compares configuration, and returns current/stale
 unknown with change lists, issues, and limitations. It does not call Git, reparse,
 write, refresh, or clear saved degraded/partial flags. No dependencies were added.
 
+Freshness is published as 22485dd, pushed with GitHub Actions passing.
+Codex implemented the CLI (index/inspect/status/refresh), console/module entrypoints,
+13 tests, and a CI console-command smoke check. Partial CLI builds are not saved;
+complete degraded builds retain visible warnings. Status is read-only. Inspection
+labels evidence as saved and not freshness-checked. No new dependencies were added.
+
 ## Checks and actual execution
 
-- pytest: 159 passed (136 existing cases plus 23 freshness cases).
+- pytest: 172 passed (159 existing cases plus 13 CLI cases).
 - Ruff lint and formatting: passed. Git diff whitespace check: passed.
 - Actual GitContext inspection: available, commit d2832ca…, dirty=True with local
   implementation edits. Snapshot-v2 recorded that context; partial=False and
@@ -47,9 +54,16 @@ write, refresh, or clear saved degraded/partial flags. No dependencies were adde
   references, content inconsistencies, size limits, and symlink refusal.
 - Actual freshness fixture after save/load: unchanged=current, same-size True→None
   edit=stale with app.py modified, invalid UTF-8=unknown. Saved file stayed unchanged.
-- The learner explicitly requested committing/pushing freshness after the
-  walkthrough. This status accompanies that commit; the session handoff records
-  its identifier, push result, and remote CI outcome.
+- Editable installation registered the gitcontext command successfully.
+- Actual installed-command run in a temporary repository: index=0, inspect=0,
+  exact chunk inspect=0, initial status=current/0, same-size edit status=stale/3,
+  refresh=0, status=current/0. Invalid UTF-8 then produced unknown/4 and refresh=4;
+  the valid saved snapshot remained byte-for-byte unchanged.
+- The learner explicitly requested committing/pushing the CLI and a detailed
+  system walkthrough. This status accompanies that commit; the session handoff
+  records its identifier, push result, and remote CI outcome.
+- All recorded Phase 2 exit checks passed locally; Phase 2 implementation is complete.
+
 
 ## Learning record
 
@@ -76,14 +90,19 @@ The learner has not yet independently written implementation code.
 
 ## Limitations and next small task
 
-The freshness walkthrough is complete. Next: explain a minimal CLI for explicit
-index/rebuild, status, and inspection, including exit codes and failure reporting.
-Ask one understanding question and wait before implementation. Lexical retrieval
-follows as milestone 3. The learner requested an explicit Phase 2 completion
-announcement. Phase 2 remains in progress until the CLI can build, inspect, check,
-and explicitly refresh snapshots, with tests and an actual end-to-end run verified.
+The learner asked for the status/refresh answer and requested moving forward.
+Codex explained that status should report and wait for explicit refresh. Independent
+reasoning about that interface choice remains unverified. Codex wrote CLI and tests.
 
-No CLI, automatic query-time freshness enforcement, retrieval, embeddings,
+Walk through cli.main: parse command → delegate to pipeline function → emit JSON
+and exit code. Review the actual end-to-end run. Ask why status must preserve the
+saved snapshot when it finds stale source. Wait before implementing lexical search.
+The learner requested a detailed review before progressing. docs/WALKTHROUGH.md
+records the architecture, execution flow, trade-offs, and actual verification for
+that review. Phase 2 completion was explicitly announced; Phase 3 is next and not
+implemented yet. Ask one understanding question before implementing lexical search.
+
+No automatic query-time freshness enforcement, retrieval, embeddings,
 model inference, API, or formal evaluation dataset exists. Tests are not evidence
 of retrieval quality. Reading/Git inspection target macOS/Linux. Discovery cannot
 promise secret detection; limited traversal can select different subsets. Python

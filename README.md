@@ -8,7 +8,49 @@ Python functions with tests. Python and Markdown chunking are also implemented.
 In-memory snapshot inventories and read-only Git context are implemented.
 Validated local snapshot saving/loading is implemented. Search and generation
 are not implemented.
-No CLI exists yet.
+The CLI supports explicit snapshot indexing, inspection, status, and refresh.
+
+For a component-by-component explanation, see [the walkthrough](docs/WALKTHROUGH.md).
+
+## CLI usage
+
+After the development installation below, activate `.venv` and run:
+
+```sh
+gitcontext index /path/to/repository
+gitcontext inspect /path/to/repository
+gitcontext status /path/to/repository
+gitcontext refresh /path/to/repository
+```
+
+`python -m gitcontext` supports the same commands. Output is JSON. Data lives at
+`REPOSITORY/.gitcontext/snapshot.json`; the storage directory is created privately
+and excluded from discovery. Keep this source-containing directory out of the
+target repository's Git tracking too; GitContext does not edit its `.gitignore`.
+
+`index` refuses to overwrite an existing snapshot. `refresh` explicitly rebuilds
+and replaces an existing valid snapshot, retaining saved limits unless overridden.
+Both refuse to publish partial builds, preserving any previous snapshot. Degraded
+but complete builds are saved with warnings and the degraded flag. Persistence
+still supports explicit partial saves through its Python API.
+
+`inspect` reports saved metadata and per-file chunk IDs. To see exact source:
+
+```sh
+gitcontext inspect /path/to/repository --chunk 'chunk-v1:FULL_DIGEST'
+```
+
+Inspection labels evidence as saved and not freshness-checked; it does not promise
+current citations. `status` checks freshness without writing. A stale result must
+be followed by an explicit `refresh` when a new snapshot is wanted. No search
+command or model generation exists yet.
+
+Exit codes: 0=success/current, 1=operational/validation error, 2=invalid arguments,
+3=stale, 4=unknown freshness or refused partial build. Index/refresh accept positive
+`--max-lines`, `--max-files`, `--max-entries`, `--max-file-bytes`, `--max-depth`, and
+`--max-total-bytes` limits. Status checks use saved limits. Root/storage symlinks
+are refused. Refresh requires a loadable saved snapshot for the same root; corrupt
+saved data is reported, not silently replaced. Concurrent writers remain unsupported.
 
 ## Planned flow
 
@@ -345,4 +387,4 @@ make source stale. An unchanged syntax-fallback snapshot may be current and stil
 degraded; current does not mean high quality. A saved partial snapshot cannot be
 certified current; an explicit rebuild is needed. This is a bounded observation,
 not a guarantee against concurrent edits or future changes. Automatic query-time
-enforcement and a user-facing refresh command await the CLI/search components.
+enforcement awaits the search component. The CLI provides explicit status/refresh.
