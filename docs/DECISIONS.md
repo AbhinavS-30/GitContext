@@ -240,3 +240,22 @@ input yields no tokens. Do not remove stopwords, stem, or infer synonyms in v1.
 Record TOKENIZATION_VERSION=code-words-v1 for future retrieval configuration.
 There is no persisted lexical index to invalidate yet, so snapshot schema remains
 unchanged. Ranking and CLI search are separate small steps. No dependency is added.
+
+## 2026-11-17: distinct-term lexical baseline
+
+Implement rank_chunks as a pure function over identified source chunks. Use unique
+query terms and exact source-text term overlap; do not reward repeated occurrences.
+Retain count scores and matched terms to make ordering inspectable. Full normalized
+identifiers plus split parts can contribute multiple matches from one input word;
+document this rather than describing scores as probabilities.
+
+Omit zero-match chunks and sort ties by relative path, line range, and ID. Bound
+queries at 2,000 characters and top_k at 100. Retokenize chunks per query for this
+small baseline; do not add persistence or caching without a demonstrated need.
+Record ranking/tokenization policy versions in the response. No snapshot schema
+change is needed because no lexical index is persisted.
+
+Explicitly label evidence as saved and not freshness-checked. Snapshot validation
+and filesystem freshness belong to the upcoming CLI search boundary. Do not expose
+a public search command without those checks. No evaluation dataset or quality
+result is inferred from tests; BM25/semantic retrieval remain separate later work.

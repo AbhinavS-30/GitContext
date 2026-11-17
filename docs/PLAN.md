@@ -77,3 +77,8 @@ Phase 2 is published as 88acbb9 with passing CI. Phase 3 has begun with the shar
 identifier-aware tokenizer. Next: explain and implement a transparent lexical
 ranking baseline, then freshness-enforced CLI search. No retrieval quality has
 been measured and no formal question set has been created.
+
+November 17: the pure distinct-term lexical ranking baseline is implemented locally
+and tested, with explainable matches and deterministic ties. Next: add CLI search
+that loads/validates a snapshot and checks freshness before returning results.
+Phase 3 remains in progress; no public search command or retrieval evaluation yet.

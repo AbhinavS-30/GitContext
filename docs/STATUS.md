@@ -1,6 +1,6 @@
 # Status
 
-Updated: November 16, 2026. Phase 2 complete and published as 88acbb9 with passing CI.
+Updated: November 17, 2026. Phase 2 complete and published as 88acbb9 with passing CI.
 Phase 3 of five core phases is in progress: lexical CLI search.
 
 ## Current implementation
@@ -41,9 +41,15 @@ case-folded full identifiers and underscore/ASCII camel/acronym parts, handles
 prose/error strings, and preserves occurrence counts without duplicate expansions.
 No dependencies, ranking, persisted lexical index, or CLI search were added.
 
+Tokenization is published as 668a8e6, pushed with GitHub Actions passing.
+Codex implemented lexical.py and 18 test cases: unique-term match count, repeated
+term behavior, full identifier matching, deterministic ties, limits, no-hit behavior,
+and Python/Markdown snapshot integration. Reports retain source metadata and label
+saved evidence as not freshness-checked. No dependencies or CLI search were added.
+
 ## Checks and actual execution
 
-- pytest: 189 passed (172 existing cases plus 17 tokenizer cases).
+- pytest: 207 passed (189 existing cases plus 18 ranking cases).
 - Ruff lint and formatting: passed. Git diff whitespace check: passed.
 - Actual GitContext inspection: available, commit d2832ca…, dirty=True with local
   implementation edits. Snapshot-v2 recorded that context; partial=False and
@@ -67,9 +73,12 @@ No dependencies, ranking, persisted lexical index, or CLI search were added.
 - Actual tokenizer run: save_reviewed_record produced the full identifier plus
   save/reviewed/record; ReviewedRecord produced reviewedrecord/reviewed/record;
   parseHTTPResponse produced parsehttpresponse/parse/http/response.
-- The learner explicitly requested publication and progression. This status
-  accompanies the tokenizer commit; the session handoff records its identifier,
-  push result, and remote CI outcome.
+- Actual ranker run from a saved/loaded fixture: query save record ranked b.py's
+  function above a.py's repeated-save comment, with scores 2 and 1 and exact matched
+  terms. An unmatched query returned zero results. The report retained the explicit
+  saved_snapshot_not_freshness_checked label.
+- The learner explicitly requested publication after the ranking walkthrough.
+  This status accompanies the ranking commit; Git history records its identifier.
 - All recorded Phase 2 exit checks passed locally; Phase 2 implementation is complete.
 
 
@@ -101,6 +110,11 @@ Codex explained retaining normalized exact identifiers alongside split terms;
 independent reasoning about that trade-off remains unverified. Codex implemented
 the tokenizer and tests. No formal evaluation questions were invented.
 
+The learner requested progression after the coverage-versus-repetition question.
+Codex explained that matching both save and record outranks repeating save. The
+learner has not independently reasoned about this policy yet. Codex wrote ranking
+and tests; these are development examples, not an evaluation question set.
+
 ## Limitations and next small task
 
 The learner asked for the status/refresh answer and requested moving forward.
@@ -108,12 +122,15 @@ Codex explained that status should report and wait for explicit refresh. Indepen
 reasoning about that interface choice remains unverified. Codex wrote CLI and tests.
 
 Phase 2 completion is published; docs/WALKTHROUGH.md records the detailed review.
-Next: walk through tokenize, casefold, and the actual outputs. Explain a transparent
-lexical ranking baseline before implementation; ask one understanding question
-about query-term coverage versus repeated occurrences, then wait. Ranking and
-freshness-enforced search CLI remain unimplemented.
+Next: walk through rank_chunks, the term-set intersection and count, deterministic
+sort, and the actual result. Ask what a score of 2 establishes (two distinct term
+matches, not correctness). Wait before implementing freshness-enforced CLI search.
+The learner answered that a score does not prove correctness, then requested
+publication and progression. Next is freshness-enforced CLI search; stale/unknown
+results must be blocked rather than shown as current source. Codex explained this
+policy; independent reasoning about it remains unverified.
 
-No automatic query-time freshness enforcement, retrieval, embeddings,
+No automatic query-time freshness enforcement, CLI search, embeddings,
 model inference, API, or formal evaluation dataset exists. Tests are not evidence
 of retrieval quality. Reading/Git inspection target macOS/Linux. Discovery cannot
 promise secret detection; limited traversal can select different subsets. Python
@@ -143,3 +160,8 @@ unchanged degraded snapshots retain their quality limitation.
 Tokenizer v1 handles ASCII camel boundaries and retains Unicode words but does not
 segment all languages, infer synonyms, stem, or remove stopwords. Its version is
 available for future retrieval configuration; no persisted lexical data exists yet.
+
+The pure ranker has no I/O, semantic understanding, stopword removal, or length/
+frequency weighting. Long/common-word-heavy chunks can rank poorly. It retokenizes
+all input chunks each call and assumes prepared/validated evidence; CLI search must
+check snapshot integrity/completeness and current source before exposing results.

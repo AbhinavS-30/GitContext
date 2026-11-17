@@ -6,10 +6,11 @@ small Python repositories and selected Markdown documentation.
 **Status:** bounded file discovery and UTF-8 source reading are implemented as
 Python functions with tests. Python and Markdown chunking are also implemented.
 In-memory snapshot inventories and read-only Git context are implemented.
-Validated local snapshot saving/loading is implemented. Search and generation
+Validated local snapshot saving/loading is implemented. CLI search and generation
 are not implemented.
 The CLI supports explicit snapshot indexing, inspection, status, and refresh.
-A shared lexical tokenizer is implemented; ranking/search is still forthcoming.
+A shared lexical tokenizer and pure ranking function are implemented; CLI search
+with freshness enforcement is still forthcoming.
 
 For a component-by-component explanation, see [the walkthrough](docs/WALKTHROUGH.md).
 
@@ -410,6 +411,37 @@ Repeated source occurrences remain repeated, while duplicate expansions within
 one occurrence are emitted once. Normalized full identifiers support future exact
 name matching; split parts support prose queries. Exact here is case-insensitive,
 not a byte-for-byte source comparison. No stemming, stopword removal, synonym
-inference, scores, persisted lexical index, or search command is implemented yet.
+inference is performed by the tokenizer. Ranking is described below; no persisted
+lexical index or search command is implemented yet.
 Queries and chunks will use the same policy when retrieval is added. Tokenizer
 examples/tests are development checks, not a formal retrieval benchmark.
+
+## Lexical ranking baseline (Python API)
+
+```python
+from gitcontext.lexical import rank_chunks
+
+report = rank_chunks(restored.chunks, "save record", top_k=5)
+for match in report.matches:
+    print(match.score, match.matched_terms, match.source.path)
+```
+
+Policy `distinct-term-overlap-v1` scores each chunk by the number of distinct
+normalized query terms found in its exact source text. Repetition in the query or
+chunk cannot inflate the score. All query/chunk text uses `code-words-v1` tokenization.
+Full identifiers and their parts are separate terms, so a single input word can
+expand into several matches. Scores are counts, not probabilities or calibrated
+relevance. No synonym inference, stopword removal, or length/frequency weighting
+is applied; long chunks and common words can still produce poor matches.
+
+Zero-match chunks are omitted. Ties use path, start/end lines, then chunk ID for
+repeatable ordering independent of input order. Results include matched terms,
+chunk ID, and exact source metadata. Queries are capped at 2,000 characters and
+top_k at 1–100 (default 5). Empty/punctuation-only/unmatched queries return no hits.
+
+This function assumes prepared/validated chunks and does not read files, establish
+freshness, or enforce snapshot completeness. Its report explicitly labels results
+as saved_snapshot_not_freshness_checked. It retokenizes the corpus per call; no
+lexical cache/index exists yet. The next component will check freshness before
+exposing results through the CLI. Passing tests and development examples do not
+measure retrieval quality; no formal evaluation dataset has been created.
