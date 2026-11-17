@@ -8,6 +8,7 @@ from pathlib import Path
 
 from gitcontext.discovery import DiscoveryLimits
 from gitcontext.freshness import check_freshness
+from gitcontext.lexical import MAX_QUERY_CHARACTERS, MAX_TOP_K, rank_chunks
 from gitcontext.persistence import load_snapshot, save_snapshot
 from gitcontext.snapshots import Snapshot, build_snapshot
 
@@ -19,14 +20,34 @@ def _positive(value: str) -> int:
     return number
 
 
+def _query(value: str) -> str:
+    if len(value) > MAX_QUERY_CHARACTERS:
+        raise argparse.ArgumentTypeError(
+            f"query exceeds {MAX_QUERY_CHARACTERS} characters"
+        )
+    return value
+
+
+def _top_k(value: str) -> int:
+    number = _positive(value)
+    if number > MAX_TOP_K:
+        raise argparse.ArgumentTypeError(f"must be at most {MAX_TOP_K}")
+    return number
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Build and inspect local source snapshots."
+        description="Build, inspect, and lexically search local source snapshots."
     )
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("index", "inspect", "status", "refresh"):
+    for name in ("index", "inspect", "status", "refresh", "search"):
         command = commands.add_parser(name)
         command.add_argument("path", type=Path, help="local repository directory")
+        if name == "search":
+            command.add_argument(
+                "query", type=_query, help="lexical question or identifier"
+            )
+            command.add_argument("--top-k", type=_top_k, default=5)
         if name == "inspect":
             command.add_argument(
                 "--chunk", help="show exact saved text for this chunk ID"
@@ -121,6 +142,33 @@ def main(argv: list[str] | None = None) -> int:
             return 0
 
         assert previous is not None
+        if args.command == "search":
+            freshness = check_freshness(previous, root)
+            output = {
+                "snapshot_id": previous.snapshot_id,
+                "query": args.query,
+                "freshness": asdict(freshness),
+                "saved_partial": previous.manifest.partial,
+                "saved_degraded": previous.manifest.degraded,
+                "snapshot_issues": [
+                    asdict(issue) for issue in previous.manifest.issues
+                ],
+                "indexed_git": asdict(previous.manifest.git),
+                "matches": [],
+            }
+            if freshness.status != "current":
+                output["evidence_state"] = f"blocked_{freshness.status}"
+                output["next_action"] = (
+                    "Resolve any inspection errors, then run refresh explicitly"
+                )
+                print(json.dumps(output, indent=2, ensure_ascii=False))
+                return {"stale": 3, "unknown": 4}[freshness.status]
+            ranked = rank_chunks(previous.chunks, args.query, top_k=args.top_k)
+            output.update(asdict(ranked))
+            output["evidence_state"] = "source_freshness_checked"
+            output["score_kind"] = "distinct_normalized_query_term_count"
+            print(json.dumps(output, indent=2, ensure_ascii=False))
+            return 0
         if args.command == "status":
             freshness = check_freshness(previous, root)
             output = {

@@ -6,11 +6,9 @@ small Python repositories and selected Markdown documentation.
 **Status:** bounded file discovery and UTF-8 source reading are implemented as
 Python functions with tests. Python and Markdown chunking are also implemented.
 In-memory snapshot inventories and read-only Git context are implemented.
-Validated local snapshot saving/loading is implemented. CLI search and generation
-are not implemented.
-The CLI supports explicit snapshot indexing, inspection, status, and refresh.
-A shared lexical tokenizer and pure ranking function are implemented; CLI search
-with freshness enforcement is still forthcoming.
+Validated local snapshot saving/loading and lexical CLI search are implemented.
+The CLI supports indexing, inspection, status, explicit refresh, and search with
+mandatory source-freshness checks. Model generation is not implemented.
 
 For a component-by-component explanation, see [the walkthrough](docs/WALKTHROUGH.md).
 
@@ -23,6 +21,7 @@ gitcontext index /path/to/repository
 gitcontext inspect /path/to/repository
 gitcontext status /path/to/repository
 gitcontext refresh /path/to/repository
+gitcontext search /path/to/repository "save record" --top-k 5
 ```
 
 `python -m gitcontext` supports the same commands. Output is JSON. Data lives at
@@ -44,8 +43,8 @@ gitcontext inspect /path/to/repository --chunk 'chunk-v1:FULL_DIGEST'
 
 Inspection labels evidence as saved and not freshness-checked; it does not promise
 current citations. `status` checks freshness without writing. A stale result must
-be followed by an explicit `refresh` when a new snapshot is wanted. No search
-command or model generation exists yet.
+be followed by an explicit `refresh` when a new snapshot is wanted. Search uses
+the transparent lexical baseline described below; model generation is absent.
 
 Exit codes: 0=success/current, 1=operational/validation error, 2=invalid arguments,
 3=stale, 4=unknown freshness or refused partial build. Index/refresh accept positive
@@ -389,7 +388,7 @@ make source stale. An unchanged syntax-fallback snapshot may be current and stil
 degraded; current does not mean high quality. A saved partial snapshot cannot be
 certified current; an explicit rebuild is needed. This is a bounded observation,
 not a guarantee against concurrent edits or future changes. Automatic query-time
-enforcement awaits the search component. The CLI provides explicit status/refresh.
+enforcement is provided by CLI search. The CLI also provides explicit status/refresh.
 
 ## Lexical tokenization (Phase 3 in progress)
 
@@ -411,9 +410,9 @@ Repeated source occurrences remain repeated, while duplicate expansions within
 one occurrence are emitted once. Normalized full identifiers support future exact
 name matching; split parts support prose queries. Exact here is case-insensitive,
 not a byte-for-byte source comparison. No stemming, stopword removal, synonym
-inference is performed by the tokenizer. Ranking is described below; no persisted
-lexical index or search command is implemented yet.
-Queries and chunks will use the same policy when retrieval is added. Tokenizer
+inference is performed by the tokenizer. Ranking and CLI search are described below;
+no persisted lexical index is implemented yet.
+Queries and chunks use the same policy during retrieval. Tokenizer
 examples/tests are development checks, not a formal retrieval benchmark.
 
 ## Lexical ranking baseline (Python API)
@@ -442,6 +441,31 @@ top_k at 1–100 (default 5). Empty/punctuation-only/unmatched queries return no
 This function assumes prepared/validated chunks and does not read files, establish
 freshness, or enforce snapshot completeness. Its report explicitly labels results
 as saved_snapshot_not_freshness_checked. It retokenizes the corpus per call; no
-lexical cache/index exists yet. The next component will check freshness before
-exposing results through the CLI. Passing tests and development examples do not
+lexical cache/index exists yet. The CLI adds mandatory freshness checks as described
+below. Passing tests and development examples do not
 measure retrieval quality; no formal evaluation dataset has been created.
+
+## Freshness-enforced CLI search
+
+```sh
+gitcontext search /path/to/repository "save_record" --top-k 5
+```
+
+Search loads/validates saved data, checks source freshness, then ranks only when
+current. Stale (exit 3) and unknown (exit 4) return an empty matches list, the
+freshness report, and an explicit refresh instruction. Blocked search never ranks,
+rebuilds, saves, or presents source snippets. A partial baseline is unknown and
+blocked. Missing/corrupt snapshots are operational errors (exit 1), not evidence.
+
+Current results include snapshot ID, indexed Git context, query terms, tokenizer/
+ranking versions, integer match counts, matched terms, chunk IDs, exact text, and
+source paths/line ranges/file hashes. The evidence label is source_freshness_checked,
+meaning checked during this request, not frozen against edits afterward. Saved
+degraded state and snapshot warnings remain visible; unchanged fallback text can
+still be searched. Scores do not prove an answer is correct or supported in meaning.
+
+Empty/unmatched queries return an empty matches list with exit 0 after freshness
+passes. Queries over 2,000 characters and --top-k outside 1–100 are argument errors
+(exit 2); default top_k is 5. Search does not mutate the saved snapshot. Retrieval
+quality is not yet measured; no BM25, semantic search, hybrid ranking, or model
+answers are included in this baseline.

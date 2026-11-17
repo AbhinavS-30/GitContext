@@ -259,3 +259,18 @@ Explicitly label evidence as saved and not freshness-checked. Snapshot validatio
 and filesystem freshness belong to the upcoming CLI search boundary. Do not expose
 a public search command without those checks. No evaluation dataset or quality
 result is inferred from tests; BM25/semantic retrieval remain separate later work.
+
+## 2026-11-17: freshness-gated lexical CLI search
+
+Add search PATH QUERY --top-k N to the existing thin CLI. Load/validate saved data,
+check freshness, and only then call the pure ranker. Stale/unknown responses include
+no snippets and exit 3/4; tests ensure ranking/rebuild/save are never invoked on
+those branches. Operational/argument errors remain exit 1/2. No-match on current
+source is a successful empty result, not an error or invented explanation.
+
+Current responses retain exact evidence metadata, snapshot identity, indexed Git,
+policy versions, matched terms/counts, and saved warnings. Override the pure ranker's
+unchecked evidence label only after this request's freshness check passes. Keep
+degraded separate; fallback source can match when current with visible warnings.
+No no-check/stale override, automatic refresh, cache, or new dependency is added.
+This check does not freeze source after inspection or establish answer quality.

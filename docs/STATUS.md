@@ -47,9 +47,15 @@ term behavior, full identifier matching, deterministic ties, limits, no-hit beha
 and Python/Markdown snapshot integration. Reports retain source metadata and label
 saved evidence as not freshness-checked. No dependencies or CLI search were added.
 
+Lexical ranking is published as dbbe2ed. Codex added CLI search and 15 tests.
+Search loads/validates, checks freshness, and ranks only current source. Stale and
+unknown states return empty matches with exit 3/4 and explicit refresh guidance.
+Current results include exact source, IDs/hashes/line ranges, matched terms/counts,
+policy versions, indexed Git, and saved warnings. No dependencies were added.
+
 ## Checks and actual execution
 
-- pytest: 207 passed (189 existing cases plus 18 ranking cases).
+- pytest: 222 passed (207 existing cases plus 15 CLI search cases).
 - Ruff lint and formatting: passed. Git diff whitespace check: passed.
 - Actual GitContext inspection: available, commit d2832ca…, dirty=True with local
   implementation edits. Snapshot-v2 recorded that context; partial=False and
@@ -77,8 +83,15 @@ saved evidence as not freshness-checked. No dependencies or CLI search were adde
   function above a.py's repeated-save comment, with scores 2 and 1 and exact matched
   terms. An unmatched query returned zero results. The report retained the explicit
   saved_snapshot_not_freshness_checked label.
-- The learner explicitly requested publication after the ranking walkthrough.
-  This status accompanies the ranking commit; Git history records its identifier.
+- Actual installed-command search fixture: current source returned one match with
+  score 2 and exact terms/path/lines. Same-size edit blocked results as stale/3;
+  explicit refresh restored search. No-match returned empty/0. Invalid UTF-8 blocked
+  results as unknown/4. Search left saved bytes unchanged.
+- Tests also assert blocked search cannot call rank/build/save, current degraded
+  fallback retains warnings, saved partial snapshots are blocked, corrupt snapshots
+  are errors, and argument/query limits are enforced.
+- The learner requested publishing ranking and CLI search. This status accompanies
+  the search commit; the session handoff records its ID, push, and remote CI result.
 - All recorded Phase 2 exit checks passed locally; Phase 2 implementation is complete.
 
 
@@ -121,16 +134,19 @@ The learner asked for the status/refresh answer and requested moving forward.
 Codex explained that status should report and wait for explicit refresh. Independent
 reasoning about that interface choice remains unverified. Codex wrote CLI and tests.
 
-Phase 2 completion is published; docs/WALKTHROUGH.md records the detailed review.
-Next: walk through rank_chunks, the term-set intersection and count, deterministic
-sort, and the actual result. Ask what a score of 2 establishes (two distinct term
-matches, not correctness). Wait before implementing freshness-enforced CLI search.
-The learner answered that a score does not prove correctness, then requested
-publication and progression. Next is freshness-enforced CLI search; stale/unknown
-results must be blocked rather than shown as current source. Codex explained this
-policy; independent reasoning about it remains unverified.
+The learner answered that score 2 does not prove correctness, then requested
+publication and progression. Codex explained that stale/unknown search must block
+snippets and request explicit refresh. Codex implemented and tested this boundary;
+independent reasoning about the blocking policy remains unverified.
 
-No automatic query-time freshness enforcement, CLI search, embeddings,
+Phase 2 remains complete and published. Phase 3 now has a usable lexical search
+baseline. Next: walk through search's validate → freshness → rank → JSON flow and
+the actual results. Ask one reasoning question about an empty successful result
+versus blocked unknown source, then wait. Agree on an evaluation contract and
+measurement tooling before adding complexity. Do not create formal benchmark
+questions, labels, or quality results without agreement.
+
+No embeddings, hybrid ranking,
 model inference, API, or formal evaluation dataset exists. Tests are not evidence
 of retrieval quality. Reading/Git inspection target macOS/Linux. Discovery cannot
 promise secret detection; limited traversal can select different subsets. Python
@@ -163,5 +179,5 @@ available for future retrieval configuration; no persisted lexical data exists y
 
 The pure ranker has no I/O, semantic understanding, stopword removal, or length/
 frequency weighting. Long/common-word-heavy chunks can rank poorly. It retokenizes
-all input chunks each call and assumes prepared/validated evidence; CLI search must
-check snapshot integrity/completeness and current source before exposing results.
+all input chunks each call and assumes prepared/validated evidence; CLI search now
+checks snapshot integrity/completeness and current source before exposing results.

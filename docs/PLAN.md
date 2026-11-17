@@ -82,3 +82,9 @@ November 17: the pure distinct-term lexical ranking baseline is implemented loca
 and tested, with explainable matches and deterministic ties. Next: add CLI search
 that loads/validates a snapshot and checks freshness before returning results.
 Phase 3 remains in progress; no public search command or retrieval evaluation yet.
+
+CLI lexical search is now implemented and tested with mandatory snapshot validation
+and freshness checks. Installed-command execution verified current results, stale/
+unknown blocking, explicit refresh, and no-match behavior. This is the first usable
+search baseline; retrieval quality remains unmeasured. Next: review actual results
+and agree on evaluation contracts/measurement before adding retrieval complexity.
