@@ -1,6 +1,6 @@
 # Status
 
-Updated: November 17, 2026. Phase 2 complete and published as 88acbb9 with passing CI.
+Updated: November 19, 2026. Phase 2 complete and published as 88acbb9 with passing CI.
 Phase 3 of five core phases is in progress: lexical CLI search.
 
 ## Current implementation
@@ -53,9 +53,16 @@ unknown states return empty matches with exit 3/4 and explicit refresh guidance.
 Current results include exact source, IDs/hashes/line ranges, matched terms/counts,
 policy versions, indexed Git, and saved warnings. No dependencies were added.
 
+CLI search is published as 3895cca, pushed with GitHub Actions passing.
+Codex added docs/EVALUATION.md, evaluation.py, and 19 tests. The contract separates
+future dataset/label provenance, eligible/attempted reporting, latency boundaries,
+citation checks, and human answer review. The implemented helper computes only
+per-observation hit/recall on supplied IDs, with explicit source status and undefined
+metrics for blocked/error or no-positive-label cases. No dependencies were added.
+
 ## Checks and actual execution
 
-- pytest: 222 passed (207 existing cases plus 15 CLI search cases).
+- pytest: 241 passed (222 existing cases plus 19 evaluation arithmetic cases).
 - Ruff lint and formatting: passed. Git diff whitespace check: passed.
 - Actual GitContext inspection: available, commit d2832ca…, dirty=True with local
   implementation edits. Snapshot-v2 recorded that context; partial=False and
@@ -90,8 +97,11 @@ policy versions, indexed Git, and saved warnings. No dependencies were added.
 - Tests also assert blocked search cannot call rank/build/save, current degraded
   fallback retains warnings, saved partial snapshots are blocked, corrupt snapshots
   are errors, and argument/query limits are enforced.
-- The learner requested publishing ranking and CLI search. This status accompanies
-  the search commit; the session handoff records its ID, push, and remote CI result.
+- Actual synthetic arithmetic run: current returned [a,x], relevant {a,b}, k=2
+  yielded hit=True and recall=0.5; unknown was unscored; empty labels were undefined.
+  These are arithmetic checks, not benchmark measurements or a labeled dataset.
+- The learner requested publication and progression. This status accompanies the
+  evaluation preparation commit; the session handoff records ID, push, and CI result.
 - All recorded Phase 2 exit checks passed locally; Phase 2 implementation is complete.
 
 
@@ -139,12 +149,18 @@ publication and progression. Codex explained that stale/unknown search must bloc
 snippets and request explicit refresh. Codex implemented and tested this boundary;
 independent reasoning about the blocking policy remains unverified.
 
-Phase 2 remains complete and published. Phase 3 now has a usable lexical search
-baseline. Next: walk through search's validate → freshness → rank → JSON flow and
-the actual results. Ask one reasoning question about an empty successful result
-versus blocked unknown source, then wait. Agree on an evaluation contract and
-measurement tooling before adding complexity. Do not create formal benchmark
-questions, labels, or quality results without agreement.
+The learner asked to progress after the distinction between current/no-match and
+unknown/blocked; Codex explained it. The learner then requested evaluation contract
+publication without answering the hit-versus-recall question. Codex explained that
+one hit can miss other needed evidence and implemented the metrics/tests. Independent
+reasoning about these distinctions remains unverified. No formal cases were created.
+
+Phase 2 remains complete; Phase 3 has a usable lexical baseline and evaluation
+preparation. Next: walk through metrics_at_k, current/blocked/empty-label rules, and
+the synthetic arithmetic. Ask why an empty label set must not become perfect recall.
+Wait before the next component. Future evaluation tooling needs snapshot/label
+validation, run orchestration, timing, citations, and aggregation as separate small
+steps; formal question/label creation still requires agreement.
 
 No embeddings, hybrid ranking,
 model inference, API, or formal evaluation dataset exists. Tests are not evidence
@@ -181,3 +197,8 @@ The pure ranker has no I/O, semantic understanding, stopword removal, or length/
 frequency weighting. Long/common-word-heavy chunks can rank poorly. It retokenizes
 all input chunks each call and assumes prepared/validated evidence; CLI search now
 checks snapshot integrity/completeness and current source before exposing results.
+
+Evaluation preparation contains no formal dataset, dataset runner, aggregate report,
+measured latency, citation evaluation report, or independent human quality review.
+The per-observation helper cannot establish label completeness or snapshot membership;
+software tests do not measure retrieval performance.

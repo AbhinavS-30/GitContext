@@ -469,3 +469,17 @@ passes. Queries over 2,000 characters and --top-k outside 1–100 are argument e
 (exit 2); default top_k is 5. Search does not mutate the saved snapshot. Retrieval
 quality is not yet measured; no BM25, semantic search, hybrid ranking, or model
 answers are included in this baseline.
+
+## Evaluation preparation
+
+[docs/EVALUATION.md](docs/EVALUATION.md) defines dataset/label provenance, snapshot
+compatibility, hit/recall denominators, blocked/error reporting, latency boundaries,
+citation checks, and the distinction between relevance and answer correctness.
+No formal questions, labels, benchmark run, or retrieval quality results exist.
+
+`evaluation.metrics_at_k` implements per-observation hit and recall arithmetic for
+supplied ranked IDs and relevance labels. It requires explicit current/stale/
+unknown/error status, rejects duplicate/malformed IDs, and leaves blocked or
+unlabelled observations unscored. It does not validate labels against a snapshot
+or run an evaluation. Tests use synthetic IDs only. Dataset runners, aggregate
+metrics, timing, citation evaluation, and human review remain future work.

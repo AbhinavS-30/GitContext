@@ -88,3 +88,9 @@ and freshness checks. Installed-command execution verified current results, stal
 unknown blocking, explicit refresh, and no-match behavior. This is the first usable
 search baseline; retrieval quality remains unmeasured. Next: review actual results
 and agree on evaluation contracts/measurement before adding retrieval complexity.
+
+November 19: docs/EVALUATION.md specifies the evaluation contract without creating
+formal cases. A pure per-observation hit/recall helper is implemented and tested on
+synthetic IDs, with explicit blocked/error/undefined states. Dataset/label creation,
+run orchestration, aggregate reporting, citation evaluation, and timing remain
+separate steps. No retrieval quality result is claimed.

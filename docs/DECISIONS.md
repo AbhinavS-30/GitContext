@@ -274,3 +274,22 @@ unchecked evidence label only after this request's freshness check passes. Keep
 degraded separate; fallback source can match when current with visible warnings.
 No no-check/stale override, automatic refresh, cache, or new dependency is added.
 This check does not freeze source after inspection or establish answer quality.
+
+## 2026-11-19: evaluation contract and per-observation metrics
+
+Document evaluation before creating any formal dataset. Keep labels versioned and
+snapshot-bound, separate development/held-out cases and unsupported/unlabelled
+expectations, and disclose attempted/eligible/blocked/error counts in future reports.
+Define timing and citation validation scope without pretending tools exist yet.
+
+Implement only pure per-observation hit/recall arithmetic for now. Apply cutoff
+before matching and reject duplicate IDs rather than moving rank positions. Require
+explicit source status; blocked/error observations are unscored and cannot contain
+evidence. Empty positive-label sets produce undefined metrics, not perfect recall
+or an inferred unsupported expectation. Current no-hit with positive labels is a
+miss and zero recall. Keep counts inspectable alongside hit and recall.
+
+No questions, labels, runner, aggregate metrics, measured latency, or retrieval gains
+are invented. Synthetic-ID unit tests establish arithmetic behavior only. Snapshot
+validation and relevance labeling belong to a later runner/workflow. No dependencies
+are added, and no new retrieval complexity is justified by these software tests.
