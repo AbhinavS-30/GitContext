@@ -1,6 +1,6 @@
 # Status
 
-Updated: November 19, 2026. Phase 2 complete and published as 88acbb9 with passing CI.
+Updated: November 20, 2026. Phase 2 complete and published as 88acbb9 with passing CI.
 Phase 3 of five core phases is in progress: lexical CLI search.
 
 ## Current implementation
@@ -60,9 +60,15 @@ citation checks, and human answer review. The implemented helper computes only
 per-observation hit/recall on supplied IDs, with explicit source status and undefined
 metrics for blocked/error or no-positive-label cases. No dependencies were added.
 
+Evaluation preparation is published as bd02cec with passing GitHub Actions.
+Codex implemented evaluation_inputs.py and 23 tests: strict frozen schemas,
+case/reference uniqueness, label/review consistency, exact snapshot binding, and
+reference membership. No dependencies or formal evaluation cases were added.
+Validation runs no queries, performs no I/O, and does not certify review claims.
+
 ## Checks and actual execution
 
-- pytest: 241 passed (222 existing cases plus 19 evaluation arithmetic cases).
+- pytest: 264 passed (241 existing cases plus 23 evaluation input cases).
 - Ruff lint and formatting: passed. Git diff whitespace check: passed.
 - Actual GitContext inspection: available, commit d2832ca…, dirty=True with local
   implementation edits. Snapshot-v2 recorded that context; partial=False and
@@ -100,8 +106,11 @@ metrics for blocked/error or no-positive-label cases. No dependencies were added
 - Actual synthetic arithmetic run: current returned [a,x], relevant {a,b}, k=2
   yielded hit=True and recall=0.5; unknown was unscored; empty labels were undefined.
   These are arithmetic checks, not benchmark measurements or a labeled dataset.
-- The learner requested publication and progression. This status accompanies the
-  evaluation preparation commit; the session handoff records ID, push, and CI result.
+- Actual synthetic schema execution: one matching record was accepted with
+  not_reviewed preserved. A different snapshot ID and an unknown relevance ID were
+  both rejected. No queries ran and no dataset/labels were saved.
+- The learner explicitly requested publication after the validation walkthrough.
+  This status accompanies the input validation commit; Git history records its ID.
 - All recorded Phase 2 exit checks passed locally; Phase 2 implementation is complete.
 
 
@@ -155,12 +164,19 @@ publication without answering the hit-versus-recall question. Codex explained th
 one hit can miss other needed evidence and implemented the metrics/tests. Independent
 reasoning about these distinctions remains unverified. No formal cases were created.
 
+The learner asked to proceed after the snapshot mismatch question. Codex explained
+that labels must be rejected instead of reused across snapshots, then implemented
+input validation and synthetic tests. Independent reasoning about the binding and
+provenance limitations remains unverified; no formal cases or labels were created.
+
 Phase 2 remains complete; Phase 3 has a usable lexical baseline and evaluation
-preparation. Next: walk through metrics_at_k, current/blocked/empty-label rules, and
-the synthetic arithmetic. Ask why an empty label set must not become perfect recall.
-Wait before the next component. Future evaluation tooling needs snapshot/label
-validation, run orchestration, timing, citations, and aggregation as separate small
-steps; formal question/label creation still requires agreement.
+preparation. Next: walk through EvaluationCase/EvaluationDataset validators and the
+actual accepted/rejected examples. Ask whether schema acceptance proves a declared
+human review occurred. Wait before building the bounded dataset loader/runner.
+The learner requested progression and publication. Codex explained that review
+status is a declaration, not verified human participation. Future runner
+work still requires freshness, blocked/error/timing/citation behavior and aggregation.
+Formal question/label creation remains a separate agreed step.
 
 No embeddings, hybrid ranking,
 model inference, API, or formal evaluation dataset exists. Tests are not evidence
@@ -200,5 +216,12 @@ checks snapshot integrity/completeness and current source before exposing result
 
 Evaluation preparation contains no formal dataset, dataset runner, aggregate report,
 measured latency, citation evaluation report, or independent human quality review.
-The per-observation helper cannot establish label completeness or snapshot membership;
+Input validation establishes supplied reference membership, not label completeness
+or reviewer identity; the per-observation metric helper itself does neither;
 software tests do not measure retrieval performance.
+
+Evaluation input validation parses already supplied JSON and has no file byte cap.
+A future loader must bound bytes before parsing. It assumes a built/loaded snapshot
+and does not validate its current filesystem freshness. Complete degraded source
+remains flagged; a partial baseline cannot be evaluated. Frozen schemas reject
+unknown fields and inconsistent claims but do not establish semantic truth.

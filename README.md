@@ -483,3 +483,11 @@ unknown/error status, rejects duplicate/malformed IDs, and leaves blocked or
 unlabelled observations unscored. It does not validate labels against a snapshot
 or run an evaluation. Tests use synthetic IDs only. Dataset runners, aggregate
 metrics, timing, citation evaluation, and human review remain future work.
+
+`evaluation_inputs.validate_evaluation_input` now validates supplied JSON case
+structure, provenance declarations, exact snapshot ID, and relevance-ID membership.
+It rejects partial baselines, duplicates, inconsistent label/review states, and
+unknown references. Supported, explicitly unsupported, and unlabelled expectations
+remain distinct. It neither verifies human review nor establishes freshness or
+runs queries. No formal input file/dataset has been created; tests use synthetic
+schema fixtures. See the evaluation contract for exact fields and limitations.

@@ -94,3 +94,8 @@ formal cases. A pure per-observation hit/recall helper is implemented and tested
 synthetic IDs, with explicit blocked/error/undefined states. Dataset/label creation,
 run orchestration, aggregate reporting, citation evaluation, and timing remain
 separate steps. No retrieval quality result is claimed.
+
+November 20: evaluation input schema and snapshot/reference validation are
+implemented locally and tested on synthetic records. Formal cases remain uncreated.
+Next: explain a bounded dataset-loading/run boundary that preserves freshness,
+blocked/error states, snapshot warnings, and measurement provenance before execution.

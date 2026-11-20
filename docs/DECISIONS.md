@@ -293,3 +293,20 @@ No questions, labels, runner, aggregate metrics, measured latency, or retrieval 
 are invented. Synthetic-ID unit tests establish arithmetic behavior only. Snapshot
 validation and relevance labeling belong to a later runner/workflow. No dependencies
 are added, and no new retrieval complexity is justified by these software tests.
+
+## 2026-11-20: evaluation input models and snapshot binding
+
+Use existing Pydantic for strict, frozen, extra-forbidding EvaluationDataset and
+EvaluationCase models. Require explicit fields and nonblank text rather than
+inventing labels or default review assertions. Validate label/expectation/reviewer
+consistency; distinguish unlabelled/undetermined from authored unsupported cases.
+
+Parse supplied JSON, reject snapshot mismatches and unknown/duplicate references,
+and reject partial source baselines before future query execution. Complete
+degraded snapshots remain distinguishable from missing source. Split/review fields
+are declarations; schema validation cannot certify held-out independence, relevance
+truth, or human participation. Do not silently relabel, repair, or migrate IDs.
+
+This is a pure validation boundary, not a file loader, runner, freshness check, or
+benchmark. Future file loading needs byte bounds. Use only synthetic unit-test
+records now; do not create the formal question set or any measured quality claim.
