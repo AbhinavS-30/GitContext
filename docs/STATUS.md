@@ -66,9 +66,14 @@ case/reference uniqueness, label/review consistency, exact snapshot binding, and
 reference membership. No dependencies or formal evaluation cases were added.
 Validation runs no queries, performs no I/O, and does not certify review claims.
 
+Input validation is published as 2583c12. Codex implemented evaluation_runner.py
+and 17 tests: bounded loader, split selection, per-case freshness and snapshot
+reload, visible failures, separate timing, reference checks, and provenance. No
+formal data, new dependencies, aggregate metrics, or evaluation CLI were added.
+
 ## Checks and actual execution
 
-- pytest: 264 passed (241 existing cases plus 23 evaluation input cases).
+- pytest: 281 passed (264 existing cases plus 17 runner/loader cases).
 - Ruff lint and formatting: passed. Git diff whitespace check: passed.
 - Actual GitContext inspection: available, commit d2832ca…, dirty=True with local
   implementation edits. Snapshot-v2 recorded that context; partial=False and
@@ -109,8 +114,14 @@ Validation runs no queries, performs no I/O, and does not certify review claims.
 - Actual synthetic schema execution: one matching record was accepted with
   not_reviewed preserved. A different snapshot ID and an unknown relevance ID were
   both rejected. No queries ran and no dataset/labels were saved.
-- The learner explicitly requested publication after the validation walkthrough.
-  This status accompanies the input validation commit; Git history records its ID.
+- Actual temporary synthetic runner execution: current case produced a reference
+  check and timing fields; changed source yielded stale, unscored, zero matches.
+  The report serialized successfully. No formal data or reports were retained.
+- Tests cover blocked ranking, input/snapshot mismatch, split filtering/report
+  isolation, visible per-case errors with continuation, bad references, unsupported/
+  unlabelled outcomes, input bounds, and snapshot replacement during execution.
+- The learner requested publication and progression. This status accompanies the
+  runner commit; the session handoff records its identifier, push, and CI result.
 - All recorded Phase 2 exit checks passed locally; Phase 2 implementation is complete.
 
 
@@ -169,14 +180,16 @@ that labels must be rejected instead of reused across snapshots, then implemente
 input validation and synthetic tests. Independent reasoning about the binding and
 provenance limitations remains unverified; no formal cases or labels were created.
 
-Phase 2 remains complete; Phase 3 has a usable lexical baseline and evaluation
-preparation. Next: walk through EvaluationCase/EvaluationDataset validators and the
-actual accepted/rejected examples. Ask whether schema acceptance proves a declared
-human review occurred. Wait before building the bounded dataset loader/runner.
-The learner requested progression and publication. Codex explained that review
-status is a declaration, not verified human participation. Future runner
-work still requires freshness, blocked/error/timing/citation behavior and aggregation.
-Formal question/label creation remains a separate agreed step.
+The learner requested progression/publication after the human-review declaration
+question. Codex explained that accepting metadata does not verify actual review,
+then implemented bounded loading and the runner. Independent reasoning about
+provenance remains unverified. Codex wrote all runner code and synthetic tests.
+
+Phase 2 is complete; Phase 3 has the lexical baseline and evaluation tooling.
+Next: walk through run_evaluation and setup/total/ranking timing, split selection,
+and the actual blocked run. Ask why blocked cases must remain in the report rather
+than disappearing. Wait before aggregate reporting or CLI evaluation. Formal
+question/label creation is still a separate agreed step.
 
 No embeddings, hybrid ranking,
 model inference, API, or formal evaluation dataset exists. Tests are not evidence
@@ -214,14 +227,21 @@ frequency weighting. Long/common-word-heavy chunks can rank poorly. It retokeniz
 all input chunks each call and assumes prepared/validated evidence; CLI search now
 checks snapshot integrity/completeness and current source before exposing results.
 
-Evaluation preparation contains no formal dataset, dataset runner, aggregate report,
-measured latency, citation evaluation report, or independent human quality review.
+There is no formal dataset, aggregate report, evaluation CLI, representative latency
+measurement, or independent human quality review. The runner records per-case
+reference/timing observations; no published quality claim follows from synthetic tests.
 Input validation establishes supplied reference membership, not label completeness
 or reviewer identity; the per-observation metric helper itself does neither;
 software tests do not measure retrieval performance.
 
-Evaluation input validation parses already supplied JSON and has no file byte cap.
-A future loader must bound bytes before parsing. It assumes a built/loaded snapshot
+The pure input validator accepts supplied JSON; the new file loader bounds bytes
+before parsing (1 MB and 1,000 cases). It assumes a built/loaded snapshot
 and does not validate its current filesystem freshness. Complete degraded source
 remains flagged; a partial baseline cannot be evaluated. Frozen schemas reject
 unknown fields and inconsistent claims but do not establish semantic truth.
+
+The runner returns an in-memory report; it does not tune, save, or refresh. Reports
+retain only selected-split case records plus the total input count, but split
+metadata cannot establish independence. Shared setup time is separate; per-case
+total includes snapshot reload/freshness/reference checks but not process startup
+or output serialization. A zero-citation observation has no validity score.

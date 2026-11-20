@@ -310,3 +310,23 @@ truth, or human participation. Do not silently relabel, repair, or migrate IDs.
 This is a pure validation boundary, not a file loader, runner, freshness check, or
 benchmark. Future file loading needs byte bounds. Use only synthetic unit-test
 records now; do not create the formal question set or any measured quality claim.
+
+## 2026-11-20: bounded input loader and lexical runner
+
+Use a regular-file/no-follow loader capped at 1 MB and 1,000 supplied cases. Require
+an explicit development/held_out split; validate all input but execute/report only
+the selected cases. Preserve the original total input count without echoing other
+split questions. Splits are metadata, not proof of held-out isolation.
+
+Record shared setup time separately, then reload/validate the snapshot per case
+so total case time includes load/freshness like the search boundary. Use perf_counter
+and separate ranking time; exclude process startup/report serialization. Preserve
+blocked/error observations rather than dropping failures or manufacturing scores.
+Per-case exceptions are recorded and later cases continue; invalid setup fails fast.
+
+Verify returned IDs and exact source against the validated snapshot; invalid
+references become unscored errors with no evidence. Zero citations produce None
+validity, not a perfect percentage. Preserve labels/provenance, full manifest,
+configuration/runtime, warnings, timing, matches, and metrics in memory. No tuning,
+refresh, automatic output save, aggregate report, or evaluation CLI is added.
+Synthetic tests/executions do not constitute a formal dataset or quality results.

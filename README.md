@@ -481,8 +481,8 @@ No formal questions, labels, benchmark run, or retrieval quality results exist.
 supplied ranked IDs and relevance labels. It requires explicit current/stale/
 unknown/error status, rejects duplicate/malformed IDs, and leaves blocked or
 unlabelled observations unscored. It does not validate labels against a snapshot
-or run an evaluation. Tests use synthetic IDs only. Dataset runners, aggregate
-metrics, timing, citation evaluation, and human review remain future work.
+or run an evaluation. Tests use synthetic IDs only. The runner below records
+per-case observations; aggregate reporting and human review remain future work.
 
 `evaluation_inputs.validate_evaluation_input` now validates supplied JSON case
 structure, provenance declarations, exact snapshot ID, and relevance-ID membership.
@@ -491,3 +491,13 @@ unknown references. Supported, explicitly unsupported, and unlabelled expectatio
 remain distinct. It neither verifies human review nor establishes freshness or
 runs queries. No formal input file/dataset has been created; tests use synthetic
 schema fixtures. See the evaluation contract for exact fields and limitations.
+
+The Python API now includes `evaluation_runner.load_evaluation_input` and
+`run_evaluation(snapshot_path, dataset_path, root, split="development", k=5)`.
+The loader caps regular-file JSON at 1 MB and 1,000 cases. The runner validates
+inputs, executes only the explicitly selected split, reloads/checks source for
+each case, and retains current/blocked/error observations with metrics, timing,
+reference checks, and provenance. Nothing is refreshed, tuned, or saved automatically.
+Aggregate reports and an evaluation CLI remain unimplemented. No formal dataset or
+measured retrieval quality exists. See the contract for timing boundaries and
+review/held-out limitations; a schema-valid review declaration is not verified review.

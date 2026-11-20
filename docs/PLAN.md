@@ -99,3 +99,9 @@ November 20: evaluation input schema and snapshot/reference validation are
 implemented locally and tested on synthetic records. Formal cases remain uncreated.
 Next: explain a bounded dataset-loading/run boundary that preserves freshness,
 blocked/error states, snapshot warnings, and measurement provenance before execution.
+
+The bounded input loader and in-memory lexical runner are implemented and tested
+with synthetic cases. They preserve split selection, setup/per-case/ranking timing,
+source-reference validation, provenance, and blocked/error observations. Next:
+review the runner, then add transparent aggregate reporting without hiding failed
+or unlabelled cases. Formal questions/labels and measured quality remain uncreated.
