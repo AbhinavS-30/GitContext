@@ -1,247 +1,85 @@
 # Status
 
-Updated: November 20, 2026. Phase 2 complete and published as 88acbb9 with passing CI.
-Phase 3 of five core phases is in progress: lexical CLI search.
+Updated: November 23, 2026. Phase 2 complete; Phase 3 in progress.
 
 ## Current implementation
 
-Bounded discovery, bounded UTF-8 reading, file hashes, exact Python/Markdown chunks,
-deterministic chunk IDs, and in-memory snapshot manifests are implemented.
-Snapshot orchestration is published as `d2832ca`; Git metadata as `2fbb80e`.
-Both were pushed with GitHub Actions passing.
-Earlier steps and their publication records are available in Git history.
+Local Python/Markdown discovery and bounded reading, exact source chunks and
+hashes/IDs, Git observation, validated atomic JSON snapshots, freshness comparison,
+and a lexical CLI search baseline are implemented. Search blocks stale/unknown
+source and never auto-refreshes. The CLI snapshot lifecycle completed Phase 2.
 
-Codex added read-only Git inspection in `git_metadata.py`, 15 test cases, and
-snapshot-v2 integration. It records available/not_repository/unavailable status,
-commit, tri-state dirty, and issue codes. It does not import or run target source,
-write to the Git index, invoke repository helpers, or access remotes. Git context
-is observed after reading, not a guarantee that source matches HEAD. Documentation
-and decisions describe dirty scope, subprocess bounds, and platform limitations.
+Published evaluation preparation: bd02cec (contract/metrics), 2583c12 (strict input
+validation), and 478369a (bounded loader/runner). All passed CI when published.
+The runner validates supplied snapshot-bound labels, explicitly selects a split,
+checks source per case, validates references, and preserves failures/timing/provenance.
+Earlier implementation/publication details remain in Git history and the walkthrough.
 
-Codex implemented validated JSON saving/loading in persistence.py and 17 tests.
-Pydantic 2.12.4 validates strict data structure; semantic checks verify IDs, exact
-file reconstruction, hashes/sizes, and line ranges/references. Saving uses a private
-verified sibling and atomic replacement. snapshot_id was extracted for shared use.
-Partial/degraded flags survive roundtrips. Persistence is published as ccd7d3f,
-pushed with GitHub Actions passing.
+Codex implemented evaluation_summary.py and 17 additional tests. It requires exact
+case coverage and consistent per-case metrics, keeps all status/label populations,
+exposes hit/recall eligibility, and reports observation-level citation validity and
+outcome-specific timing. No dependencies or formal evaluation cases were added.
 
-Codex implemented freshness.py and 23 additional tests. Explicit comparison reads
-supported scope/content again, compares configuration, and returns current/stale/
-unknown with change lists, issues, and limitations. It does not call Git, reparse,
-write, refresh, or clear saved degraded/partial flags. No dependencies were added.
+## Verification and publication
 
-Freshness is published as 22485dd, pushed with GitHub Actions passing.
-Codex implemented the CLI (index/inspect/status/refresh), console/module entrypoints,
-13 tests, and a CI console-command smoke check. Partial CLI builds are not saved;
-complete degraded builds retain visible warnings. Status is read-only. Inspection
-labels evidence as saved and not freshness-checked. No new dependencies were added.
-
-Codex implemented tokenization.py and 17 tests for code-words-v1. It preserves
-case-folded full identifiers and underscore/ASCII camel/acronym parts, handles
-prose/error strings, and preserves occurrence counts without duplicate expansions.
-No dependencies, ranking, persisted lexical index, or CLI search were added.
-
-Tokenization is published as 668a8e6, pushed with GitHub Actions passing.
-Codex implemented lexical.py and 18 test cases: unique-term match count, repeated
-term behavior, full identifier matching, deterministic ties, limits, no-hit behavior,
-and Python/Markdown snapshot integration. Reports retain source metadata and label
-saved evidence as not freshness-checked. No dependencies or CLI search were added.
-
-Lexical ranking is published as dbbe2ed. Codex added CLI search and 15 tests.
-Search loads/validates, checks freshness, and ranks only current source. Stale and
-unknown states return empty matches with exit 3/4 and explicit refresh guidance.
-Current results include exact source, IDs/hashes/line ranges, matched terms/counts,
-policy versions, indexed Git, and saved warnings. No dependencies were added.
-
-CLI search is published as 3895cca, pushed with GitHub Actions passing.
-Codex added docs/EVALUATION.md, evaluation.py, and 19 tests. The contract separates
-future dataset/label provenance, eligible/attempted reporting, latency boundaries,
-citation checks, and human answer review. The implemented helper computes only
-per-observation hit/recall on supplied IDs, with explicit source status and undefined
-metrics for blocked/error or no-positive-label cases. No dependencies were added.
-
-Evaluation preparation is published as bd02cec with passing GitHub Actions.
-Codex implemented evaluation_inputs.py and 23 tests: strict frozen schemas,
-case/reference uniqueness, label/review consistency, exact snapshot binding, and
-reference membership. No dependencies or formal evaluation cases were added.
-Validation runs no queries, performs no I/O, and does not certify review claims.
-
-Input validation is published as 2583c12. Codex implemented evaluation_runner.py
-and 17 tests: bounded loader, split selection, per-case freshness and snapshot
-reload, visible failures, separate timing, reference checks, and provenance. No
-formal data, new dependencies, aggregate metrics, or evaluation CLI were added.
-
-## Checks and actual execution
-
-- pytest: 281 passed (264 existing cases plus 17 runner/loader cases).
+- pytest: 298 passed (281 existing cases plus 17 summary cases).
 - Ruff lint and formatting: passed. Git diff whitespace check: passed.
-- Actual GitContext inspection: available, commit d2832ca…, dirty=True with local
-  implementation edits. Snapshot-v2 recorded that context; partial=False and
-  degraded=False. These are source flags, independent of Git availability.
-- Tests include clean/modified/staged/deleted/untracked/ignored files, unborn and
-  non-Git folders, ancestor rejection, inherited environment overrides, missing
-  Git, timeouts, excessive output, status failure, index immutability, and a
-  configured filesystem-monitor helper that must not execute.
-- Actual persistence fixture: initial snapshot roundtripped exactly; simulated
-  replacement failure preserved the old snapshot; a successful retry replaced it.
-- Tests also interrupt a write halfway through and verify old bytes survive, plus
-  fsync/verification failures, malformed JSON, wrong schema/IDs/types, broken
-  references, content inconsistencies, size limits, and symlink refusal.
-- Actual freshness fixture after save/load: unchanged=current, same-size True→None
-  edit=stale with app.py modified, invalid UTF-8=unknown. Saved file stayed unchanged.
-- Editable installation registered the gitcontext command successfully.
-- Actual installed-command run in a temporary repository: index=0, inspect=0,
-  exact chunk inspect=0, initial status=current/0, same-size edit status=stale/3,
-  refresh=0, status=current/0. Invalid UTF-8 then produced unknown/4 and refresh=4;
-  the valid saved snapshot remained byte-for-byte unchanged.
-- Actual tokenizer run: save_reviewed_record produced the full identifier plus
-  save/reviewed/record; ReviewedRecord produced reviewedrecord/reviewed/record;
-  parseHTTPResponse produced parsehttpresponse/parse/http/response.
-- Actual ranker run from a saved/loaded fixture: query save record ranked b.py's
-  function above a.py's repeated-save comment, with scores 2 and 1 and exact matched
-  terms. An unmatched query returned zero results. The report retained the explicit
-  saved_snapshot_not_freshness_checked label.
-- Actual installed-command search fixture: current source returned one match with
-  score 2 and exact terms/path/lines. Same-size edit blocked results as stale/3;
-  explicit refresh restored search. No-match returned empty/0. Invalid UTF-8 blocked
-  results as unknown/4. Search left saved bytes unchanged.
-- Tests also assert blocked search cannot call rank/build/save, current degraded
-  fallback retains warnings, saved partial snapshots are blocked, corrupt snapshots
-  are errors, and argument/query limits are enforced.
-- Actual synthetic arithmetic run: current returned [a,x], relevant {a,b}, k=2
-  yielded hit=True and recall=0.5; unknown was unscored; empty labels were undefined.
-  These are arithmetic checks, not benchmark measurements or a labeled dataset.
-- Actual synthetic schema execution: one matching record was accepted with
-  not_reviewed preserved. A different snapshot ID and an unknown relevance ID were
-  both rejected. No queries ran and no dataset/labels were saved.
-- Actual temporary synthetic runner execution: current case produced a reference
-  check and timing fields; changed source yielded stale, unscored, zero matches.
-  The report serialized successfully. No formal data or reports were retained.
-- Tests cover blocked ranking, input/snapshot mismatch, split filtering/report
-  isolation, visible per-case errors with continuation, bad references, unsupported/
-  unlabelled outcomes, input bounds, and snapshot replacement during execution.
-- The learner requested publication and progression. This status accompanies the
-  runner commit; the session handoff records its identifier, push, and CI result.
-- All recorded Phase 2 exit checks passed locally; Phase 2 implementation is complete.
-
+- Actual temporary synthetic execution: two cases attempted, one current and one
+  stale, one eligible for scoring. Both observations remained visible; blocked
+  ranking-time population was empty. No formal data or report was retained.
+- Tests distinguish macro from pooled recall using unequal label counts; retain
+  citation failures after errors; handle zero eligible/checked populations without
+  invented scores; separate timings; and reject missing/duplicate/inconsistent rows.
+- The learner explicitly requested publication and progression. This status
+  accompanies the aggregate-summary commit; Git history records its identifier.
 
 ## Learning record
 
-The learner correctly recognized: text reads do not execute code; scan limits
-require partial reporting; reading must enforce limits again; equal sizes can hide
-edits; identical bytes share a hash; decorators belong with functions; syntax-error
-source should remain with a fallback warning; and commit IDs alone cannot describe
-indexed uncommitted edits. The learner correctly answered that a failed Git status
-inspection requires dirty=None, not False. Codex implemented all components and
-tests so far. The learner initially thought a failed refresh should remove the
-old snapshot. After correction, the learner correctly identified changed source
-as stale; the preserve-old-file reasoning was explained but not independently
-restated. Codex implemented persistence and tests. The learner correctly identified
-unreadable source as freshness unknown, then agreed to proceed. Codex implemented
-freshness comparison and tests. Codex explained that Git context changes alone
-do not make identical supported source/configuration stale; independent reasoning
-on this distinction remains unverified.
+The learner correctly identified: text reads do not execute code; limits can make
+scans partial and must be rechecked during reads; same-size edits need content
+hashes; identical bytes share hashes; decorators belong with functions; syntax-error
+source should be retained with warnings; Git commits do not capture uncommitted
+edits; unknown dirty/freshness must not be called clean/current; overlap scores do
+not prove answer correctness. Codex authored all implementation and tests so far.
 
-Explanations were provided, but independent reasoning remains unverified, for:
-expected exclusions versus missed source, strict decoding versus silent repair,
-fragment context, fenced-code headings, path/configuration-sensitive chunk IDs,
-and the distinction between a run inventory and an atomic repository snapshot.
-The learner has not yet independently written implementation code.
+Explanations were supplied, but independent reasoning remains unverified for:
+expected exclusions versus missing source, strict decoding versus repair, fragment
+context, Markdown fence handling, path/configuration-sensitive IDs, atomicity versus
+run inventories, preservation after failed refresh, explicit refresh versus checking,
+label provenance and held-out independence, and aggregate denominator choices.
+The learner requested progression rather than answering several follow-ups. This
+is not evidence of independently implementing or fully explaining those components.
 
-After the detailed system walkthrough, the learner requested progression.
-Codex explained retaining normalized exact identifiers alongside split terms;
-independent reasoning about that trade-off remains unverified. Codex implemented
-the tokenizer and tests. No formal evaluation questions were invented.
+For the current step, Codex explained that a blocked case stays in attempted count
+but receives no hit/recall score. The learner has not independently restated that
+reasoning. Synthetic executions and Codex review are not independent human validation.
 
-The learner requested progression after the coverage-versus-repetition question.
-Codex explained that matching both save and record outranks repeating save. The
-learner has not independently reasoned about this policy yet. Codex wrote ranking
-and tests; these are development examples, not an evaluation question set.
+## Next small task and limitations
 
-## Limitations and next small task
+Walk through summarize_run, eligible versus attempted counts, macro recall, and
+outcome-specific timing/citation populations. Ask why a zero-eligible report cannot
+honestly claim 100% hit rate. Wait before the next component. Commit/push summaries
+at the learner's request. Codex explained that zero eligible cases means undefined
+metrics. Next: add an explicit evaluation CLI/report
+boundary; formal question/label creation still requires separate agreement.
 
-The learner asked for the status/refresh answer and requested moving forward.
-Codex explained that status should report and wait for explicit refresh. Independent
-reasoning about that interface choice remains unverified. Codex wrote CLI and tests.
+No formal dataset, benchmark quality result, evaluation CLI, representative latency
+measurement, embeddings, hybrid ranking, model inference, or API exists. Unit tests
+verify software behavior, not retrieval quality. Aggregate numbers on synthetic
+fixtures must never be promoted into benchmark results.
 
-The learner answered that score 2 does not prove correctness, then requested
-publication and progression. Codex explained that stale/unknown search must block
-snippets and request explicit refresh. Codex implemented and tested this boundary;
-independent reasoning about the blocking policy remains unverified.
+Freshness is an observation, not a repository-wide atomic snapshot or watcher.
+Source/CLI inspection does not guarantee secret detection. Python methods stay
+inside class chunks; Markdown supports a documented subset; line limits are not
+token limits. Snapshot storage uses trusted directories, no writer lock, and no
+complete power-loss guarantee. Preserve saved source privately and outside Git.
+Git dirty has documented ignored/submodule limits and is not source freshness.
 
-The learner asked to progress after the distinction between current/no-match and
-unknown/blocked; Codex explained it. The learner then requested evaluation contract
-publication without answering the hit-versus-recall question. Codex explained that
-one hit can miss other needed evidence and implemented the metrics/tests. Independent
-reasoning about these distinctions remains unverified. No formal cases were created.
+Evaluation inputs are bounded at 1 MB/1,000 cases. Review/split declarations do not
+verify human participation or independent held-out data. Runner totals include
+per-case snapshot reload/freshness/reference checks, not process startup or report
+serialization; shared setup is separate. Summaries preserve these boundaries and
+assume runner-produced data. No references means no citation-validity credit.
 
-The learner asked to proceed after the snapshot mismatch question. Codex explained
-that labels must be rejected instead of reused across snapshots, then implemented
-input validation and synthetic tests. Independent reasoning about the binding and
-provenance limitations remains unverified; no formal cases or labels were created.
-
-The learner requested progression/publication after the human-review declaration
-question. Codex explained that accepting metadata does not verify actual review,
-then implemented bounded loading and the runner. Independent reasoning about
-provenance remains unverified. Codex wrote all runner code and synthetic tests.
-
-Phase 2 is complete; Phase 3 has the lexical baseline and evaluation tooling.
-Next: walk through run_evaluation and setup/total/ranking timing, split selection,
-and the actual blocked run. Ask why blocked cases must remain in the report rather
-than disappearing. Wait before aggregate reporting or CLI evaluation. Formal
-question/label creation is still a separate agreed step.
-
-No embeddings, hybrid ranking,
-model inference, API, or formal evaluation dataset exists. Tests are not evidence
-of retrieval quality. Reading/Git inspection target macOS/Linux. Discovery cannot
-promise secret detection; limited traversal can select different subsets. Python
-methods remain inside class chunks; Markdown handles a documented ATX/fence subset.
-Line bounds do not bound model tokens; fragments can omit important context.
-
-Git dirty is repository-wide, excluding ignored files and unstaged changes within
-submodule worktrees. Source hashes remain authoritative for bytes read. Metadata
-failure never means clean. Git stdout is temporarily spooled, capped on acceptance
-at 64 KiB, with a five-second command timeout; temporary spool bytes are not capped.
-No whole-repository atomicity is guaranteed. Git metadata contributes to snapshot-v2
-IDs while chunk IDs remain source/configuration based.
-
-Python 3.12.13 is available. Ollama was installed but not running at initial
-inspection; llama3.2:3b had a manifest. Inference and embeddings remain unverified.
-
-Persistence uses a trusted pre-existing local directory and a 64 MB serialized
-file bound. No concurrent writer lock, directory-fsync power-loss guarantee, or
-snapshot authentication is implemented. Abrupt termination can leave a temporary
-sibling. Keep saved source snapshots in ignored .gitcontext or another private
-location. Loading does not read target source and cannot certify freshness. The explicit
-freshness check does read target source, but cannot freeze concurrent edits or
-certify a saved partial inventory as current. Unknown takes precedence over known
-changes while retaining those changes in the report. Removals need full discovery;
-unchanged degraded snapshots retain their quality limitation.
-
-Tokenizer v1 handles ASCII camel boundaries and retains Unicode words but does not
-segment all languages, infer synonyms, stem, or remove stopwords. Its version is
-available for future retrieval configuration; no persisted lexical data exists yet.
-
-The pure ranker has no I/O, semantic understanding, stopword removal, or length/
-frequency weighting. Long/common-word-heavy chunks can rank poorly. It retokenizes
-all input chunks each call and assumes prepared/validated evidence; CLI search now
-checks snapshot integrity/completeness and current source before exposing results.
-
-There is no formal dataset, aggregate report, evaluation CLI, representative latency
-measurement, or independent human quality review. The runner records per-case
-reference/timing observations; no published quality claim follows from synthetic tests.
-Input validation establishes supplied reference membership, not label completeness
-or reviewer identity; the per-observation metric helper itself does neither;
-software tests do not measure retrieval performance.
-
-The pure input validator accepts supplied JSON; the new file loader bounds bytes
-before parsing (1 MB and 1,000 cases). It assumes a built/loaded snapshot
-and does not validate its current filesystem freshness. Complete degraded source
-remains flagged; a partial baseline cannot be evaluated. Frozen schemas reject
-unknown fields and inconsistent claims but do not establish semantic truth.
-
-The runner returns an in-memory report; it does not tune, save, or refresh. Reports
-retain only selected-split case records plus the total input count, but split
-metadata cannot establish independence. Shared setup time is separate; per-case
-total includes snapshot reload/freshness/reference checks but not process startup
-or output serialization. A zero-citation observation has no validity score.
+Python 3.12.13 is available; Ollama/model state was last inspected at project setup
+and must be rechecked before any local-model selection or download.

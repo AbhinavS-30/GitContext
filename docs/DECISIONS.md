@@ -330,3 +330,21 @@ validity, not a perfect percentage. Preserve labels/provenance, full manifest,
 configuration/runtime, warnings, timing, matches, and metrics in memory. No tuning,
 refresh, automatic output save, aggregate report, or evaluation CLI is added.
 Synthetic tests/executions do not constitute a formal dataset or quality results.
+
+## 2026-11-23: aggregate evaluation summaries
+
+Require one consistent observation per selected case and recompute per-case metric
+arithmetic before aggregating. Count every attempted status. Score hit rate/macro
+recall only over current positive-label observations and expose that denominator.
+Use macro mean rather than pooled label counts. No eligible cases means None.
+
+Preserve unsupported/unlabelled populations, source degraded state and identity,
+and citation failures that became errors. Citation validity is observation-level;
+the runner does not provide enough information for a per-reference failure ratio.
+Do not award citation credit when no references were checked.
+
+Group timing by outcome with count/min/mean/median/max. Retain ranking phases that
+completed before a subsequent error, but never fabricate blocked ranking times.
+Shared setup stays separate. This pure summary adds no CLI, saving, dataset cases,
+or measured quality claim. Use synthetic tests with unequal label counts to verify
+that macro recall is not accidentally implemented as pooled recall.

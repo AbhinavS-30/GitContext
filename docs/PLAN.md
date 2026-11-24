@@ -105,3 +105,8 @@ with synthetic cases. They preserve split selection, setup/per-case/ranking timi
 source-reference validation, provenance, and blocked/error observations. Next:
 review the runner, then add transparent aggregate reporting without hiding failed
 or unlabelled cases. Formal questions/labels and measured quality remain uncreated.
+
+November 23: aggregate reporting is implemented locally and tested with explicit
+status/label/metric/citation populations and outcome-specific timing summaries.
+Next: review denominators and connect the runner/report to an explicit evaluation
+CLI without creating formal cases or claiming measured retrieval quality.

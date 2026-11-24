@@ -482,7 +482,8 @@ supplied ranked IDs and relevance labels. It requires explicit current/stale/
 unknown/error status, rejects duplicate/malformed IDs, and leaves blocked or
 unlabelled observations unscored. It does not validate labels against a snapshot
 or run an evaluation. Tests use synthetic IDs only. The runner below records
-per-case observations; aggregate reporting and human review remain future work.
+per-case observations; aggregate reporting is available below. Human quality review
+remains future work.
 
 `evaluation_inputs.validate_evaluation_input` now validates supplied JSON case
 structure, provenance declarations, exact snapshot ID, and relevance-ID membership.
@@ -498,6 +499,16 @@ The loader caps regular-file JSON at 1 MB and 1,000 cases. The runner validates
 inputs, executes only the explicitly selected split, reloads/checks source for
 each case, and retains current/blocked/error observations with metrics, timing,
 reference checks, and provenance. Nothing is refreshed, tuned, or saved automatically.
-Aggregate reports and an evaluation CLI remain unimplemented. No formal dataset or
+Aggregate summaries are available through the Python API; an evaluation CLI remains
+unimplemented. No formal dataset or
 measured retrieval quality exists. See the contract for timing boundaries and
 review/held-out limitations; a schema-valid review declaration is not verified review.
+
+`evaluation_summary.summarize_run(run)` produces explicit attempted/current/stale/
+unknown/error counts, label populations, eligible count, hit rate and macro recall,
+observation-level citation validity, and separate timing summaries by outcome.
+Missing, duplicate, or inconsistent observations are rejected; zero eligible cases
+produce undefined metrics rather than 0% or 100%. The summary retains dataset,
+snapshot, split, policy, and degraded-state context. It does not execute queries,
+label evidence, save reports, or establish retrieval quality. See EVALUATION.md
+for exact denominators; tests use synthetic observations, not formal benchmarks.

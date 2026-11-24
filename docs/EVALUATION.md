@@ -88,11 +88,10 @@ Stale/unknown/error states are explicit and unscored (None), not zeros or succes
 Supplying evidence for those states is an error. The helper does not inspect files,
 validate IDs against a snapshot, label relevance, time retrieval, or run a dataset.
 
-Future hit rate@k is the mean of per-case hits over current positively labeled cases,
-with that eligible count disclosed alongside attempted/blocked/error counts. Future
+Aggregate hit rate@k is the mean of per-case hits over current positively labeled cases,
+with that eligible count disclosed alongside attempted/blocked/error counts. Aggregate
 macro recall@k averages per-case recall over the same eligible cases. No eligible
-cases means undefined metrics, never zero or 100%. Aggregate tooling is not yet
-implemented. Any later end-to-end reliability measure must state its denominator
+cases means undefined metrics, never zero or 100%. The implemented summary helper follows these rules. Any later end-to-end reliability measure must state its denominator
 and keep failed versus current-no-match outcomes distinguishable.
 
 ## Timing, citations, unsupported questions, and future answers
@@ -120,7 +119,7 @@ and sufficiency. No answering model or answer correctness evaluation exists now.
 
 Freshness and refresh behavior already have software tests, including unknown,
 stale, and interrupted-write cases. They are not benchmark results. The formal
-dataset, aggregate reports, evaluation CLI, representative timing measurements,
+dataset, evaluation CLI, representative timing measurements,
 and human quality review remain future work. Do not add retrieval complexity based on invented gains.
 
 ## Bounded loader and lexical runner (Python API)
@@ -146,7 +145,8 @@ not changed, checks freshness, and ranks only current source. It separately reco
 ranking_seconds and total_seconds through reference checks and metric calculation.
 Total per-case timing excludes shared setup, process startup, and report serialization;
 it includes that case's snapshot reload. Do not call it whole-CLI wall-clock latency.
-Blocked/error cases have no successful ranking time. Timings on synthetic fixtures
+Blocked cases have no ranking time; errors can retain timing for a ranking phase
+that completed before a later reference-check failure. Timings on synthetic fixtures
 are not representative measurements or evidence of speed gains.
 
 Returned references must be unique and match the validated snapshot's exact source
@@ -162,6 +162,46 @@ EvaluationRun retains dataset identity/provenance for the selected cases, the fu
 snapshot manifest (including hashes/Git/configuration/warnings), root, corpus size,
 policies/runtime, setup time, and every selected observation. It is returned in
 memory; no report is automatically saved, no snapshots refreshed, and no settings
-are tuned. There are no aggregate metrics or evaluation CLI yet. Tests and temporary
+are tuned. Aggregate summaries are available below; there is no evaluation CLI yet. Tests and temporary
 executions use synthetic schema/runner records only, with no retained formal data
 or claimed quality result. No model is called or downloaded.
+
+## Aggregate summaries (Python API)
+
+`evaluation_summary.summarize_run(run)` accepts a runner-created EvaluationRun and
+requires exactly one matching observation for every selected case. Missing or
+repeated case records, inconsistent stored per-case metrics, invalid timings, or
+inconsistent citation-count/validity populations are rejected rather than silently
+changing denominators. The helper is pure: it never queries, reads, writes, labels,
+or tunes. Preserve the detailed run alongside its summary for diagnosis.
+
+The summary records dataset ID/version, total input case count, selected split,
+snapshot ID, saved degraded state, k, and ranking/tokenization policies. Attempted
+is the selected observation count, including all current/stale/unknown/error cases;
+status counts sum to attempted. Supported/unsupported/unlabelled counts span all
+attempted outcomes. Eligible is only current cases with positive relevance labels.
+Hit count divided by eligible gives hit rate@k; mean per-case recall gives macro
+recall@k. Macro recall is not pooled matched labels divided by pooled relevant
+labels. Zero eligible cases means both metrics are None. Blocked/error cases remain
+in attempted/status counts without becoming fabricated misses or successes.
+
+Current explicitly unsupported cases and how many returned lexical matches are
+counted separately. This is observed behavior, not an answerability probability or
+a claim that no match proves no relevant evidence exists. Unlabelled cases do not
+become implicitly unsupported or inflate recall.
+
+Citation counts include checked observations and checked references, plus valid
+and invalid observation counts. citation_observation_validity_rate divides fully
+valid checked observations by all checked observations, including failures that
+became errors. It is not a per-reference rate: a failed multi-reference observation
+cannot identify exactly how many individual references failed. No checked
+observations means None, not a perfect validity score. Current empty results and
+blocked cases do not create citation-validity credit.
+
+Timing populations are grouped by current/stale/unknown/error. Each total/ranking
+summary provides count, minimum, mean, median, maximum; an empty group has count 0
+and undefined statistics. Total times include successful no-match requests and
+blocked/errors in their own groups. A ranking phase completed before a later error
+can appear in the error group's ranking samples. Shared setup is retained in the
+run, not repeatedly added to case times. No representative latency claim follows
+from synthetic fixtures; record real corpus conditions and variability separately.
