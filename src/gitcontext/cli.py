@@ -6,7 +6,11 @@ import sys
 from dataclasses import asdict, replace
 from pathlib import Path
 
+from pydantic import TypeAdapter
+
 from gitcontext.discovery import DiscoveryLimits
+from gitcontext.evaluation_runner import EvaluationRun, run_evaluation
+from gitcontext.evaluation_summary import summarize_run
 from gitcontext.freshness import check_freshness
 from gitcontext.lexical import MAX_QUERY_CHARACTERS, MAX_TOP_K, rank_chunks
 from gitcontext.persistence import load_snapshot, save_snapshot
@@ -40,9 +44,20 @@ def _parser() -> argparse.ArgumentParser:
         description="Build, inspect, and lexically search local source snapshots."
     )
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("index", "inspect", "status", "refresh", "search"):
+    for name in ("index", "inspect", "status", "refresh", "search", "evaluate"):
         command = commands.add_parser(name)
         command.add_argument("path", type=Path, help="local repository directory")
+        if name == "evaluate":
+            command.add_argument(
+                "--dataset",
+                type=Path,
+                required=True,
+                help="supplied evaluation-input-v1 JSON",
+            )
+            command.add_argument(
+                "--split", choices=("development", "held_out"), required=True
+            )
+            command.add_argument("--top-k", type=_top_k, default=5)
         if name == "search":
             command.add_argument(
                 "query", type=_query, help="lexical question or identifier"
@@ -91,6 +106,24 @@ def main(argv: list[str] | None = None) -> int:
         destination = storage / "snapshot.json"
         if storage.is_symlink() or destination.is_symlink():
             raise ValueError("Snapshot storage must not be a symlink")
+        if args.command == "evaluate":
+            run = run_evaluation(
+                destination, args.dataset, root, split=args.split, k=args.top_k
+            )
+            summary = summarize_run(run)
+            output = {
+                "report_version": "evaluation-report-v1",
+                "run": TypeAdapter(EvaluationRun).dump_python(run, mode="json"),
+                "summary": asdict(summary),
+            }
+            print(json.dumps(output, indent=2, ensure_ascii=False, allow_nan=False))
+            if summary.errors:
+                return 1
+            if summary.unknown:
+                return 4
+            if summary.stale:
+                return 3
+            return 0
         previous = None
         if args.command == "index":
             if destination.exists():

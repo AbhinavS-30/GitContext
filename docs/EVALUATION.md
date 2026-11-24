@@ -52,7 +52,7 @@ human review is not proof that one occurred; no human-review claim is generated 
 this tool. Split metadata is retained but cannot prove a held-out case was never
 seen during development. This function performs no I/O, freshness checks, retrieval,
 or labeling. It accepts already supplied JSON; the bounded loader below limits
-file input before parsing. No evaluation CLI exists yet. Tests use visibly
+file input before parsing. The evaluation CLI below uses the same boundary. Tests use visibly
 synthetic records, not formal questions or independent relevance labels.
 
 ## Observation/run contract and implemented Python runner
@@ -119,7 +119,7 @@ and sufficiency. No answering model or answer correctness evaluation exists now.
 
 Freshness and refresh behavior already have software tests, including unknown,
 stale, and interrupted-write cases. They are not benchmark results. The formal
-dataset, evaluation CLI, representative timing measurements,
+dataset, representative timing measurements,
 and human quality review remain future work. Do not add retrieval complexity based on invented gains.
 
 ## Bounded loader and lexical runner (Python API)
@@ -162,7 +162,7 @@ EvaluationRun retains dataset identity/provenance for the selected cases, the fu
 snapshot manifest (including hashes/Git/configuration/warnings), root, corpus size,
 policies/runtime, setup time, and every selected observation. It is returned in
 memory; no report is automatically saved, no snapshots refreshed, and no settings
-are tuned. Aggregate summaries are available below; there is no evaluation CLI yet. Tests and temporary
+are tuned. Aggregate summaries and the explicit CLI are available below. Tests and temporary
 executions use synthetic schema/runner records only, with no retained formal data
 or claimed quality result. No model is called or downloaded.
 
@@ -205,3 +205,22 @@ blocked/errors in their own groups. A ranking phase completed before a later err
 can appear in the error group's ranking samples. Shared setup is retained in the
 run, not repeatedly added to case times. No representative latency claim follows
 from synthetic fixtures; record real corpus conditions and variability separately.
+
+## Explicit evaluation CLI
+
+`gitcontext evaluate ROOT --dataset INPUT --split development --top-k 5` invokes
+bounded input loading, snapshot validation/binding, the selected-split runner, and
+summary consistency checks. held_out is the other accepted split; neither split is
+automatic. Output is evaluation-report-v1 JSON with run and summary. No dataset,
+label, report file, settings change, or refreshed snapshot is created automatically.
+User-directed stdout redirection is possible; reports contain private source and
+provenance and must not be committed accidentally.
+
+Exit 0 means current execution completed, even when hits/recall are zero or
+undefined for a non-positive-label population. There is no automatic quality
+threshold. Errors take exit 1; argument errors take exit 2; unknown source takes
+exit 4 if there are no errors, otherwise stale source takes exit 3 if there are no
+errors/unknowns. Per-case failures retain a full report. Invalid setup/input fails
+before queries and returns an explicit error, not a fabricated run. Snapshot and
+input files remain unchanged. This CLI does not validate that declared human
+review happened, repair stale labels, or make held-out data independent by itself.

@@ -110,3 +110,10 @@ November 23: aggregate reporting is implemented locally and tested with explicit
 status/label/metric/citation populations and outcome-specific timing summaries.
 Next: review denominators and connect the runner/report to an explicit evaluation
 CLI without creating formal cases or claiming measured retrieval quality.
+
+The explicit evaluation CLI is implemented and tested, producing a versioned run
+and summary without automatic data/report creation or refresh. The installed
+command passed synthetic current/stale/unknown execution and read-only checks.
+Next: review the end-to-end baseline and agree on actual development evaluation
+data/labels and their fixed snapshot before claiming quality or adding complexity.
+The formal ten-question set has not been created.

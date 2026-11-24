@@ -20,9 +20,14 @@ case coverage and consistent per-case metrics, keeps all status/label population
 exposes hit/recall eligibility, and reports observation-level citation validity and
 outcome-specific timing. No dependencies or formal evaluation cases were added.
 
+Aggregate summaries are published as 2eca04d. Codex added an evaluation CLI branch
+and 12 integration tests. It requires supplied data and explicit split, emits
+versioned detailed-run/summary JSON, and preserves execution-status exit codes.
+It does not generate cases, save reports automatically, or refresh snapshots.
+
 ## Verification and publication
 
-- pytest: 298 passed (281 existing cases plus 17 summary cases).
+- pytest: 310 passed (298 existing cases plus 12 evaluation CLI cases).
 - Ruff lint and formatting: passed. Git diff whitespace check: passed.
 - Actual temporary synthetic execution: two cases attempted, one current and one
   stale, one eligible for scoring. Both observations remained visible; blocked
@@ -30,8 +35,14 @@ outcome-specific timing. No dependencies or formal evaluation cases were added.
 - Tests distinguish macro from pooled recall using unequal label counts; retain
   citation failures after errors; handle zero eligible/checked populations without
   invented scores; separate timings; and reject missing/duplicate/inconsistent rows.
-- The learner explicitly requested publication and progression. This status
-  accompanies the aggregate-summary commit; Git history records its identifier.
+- Actual installed evaluate command with temporary synthetic input emitted a
+  current report/exit 0, then stale/exit 3 and unknown/exit 4 after source changes.
+  Saved snapshot bytes remained unchanged. No data/report was retained.
+- Tests cover versioned serialization, explicit split/no other-split case leakage,
+  no-hit success, setup mismatch, per-case error reports, arguments, symlink input,
+  blocked populations, and preservation of input/snapshot bytes.
+- The learner requested publication/progression. This status accompanies the
+  evaluation CLI commit; the session handoff records ID, push, and remote CI result.
 
 ## Learning record
 
@@ -56,14 +67,18 @@ reasoning. Synthetic executions and Codex review are not independent human valid
 
 ## Next small task and limitations
 
-Walk through summarize_run, eligible versus attempted counts, macro recall, and
-outcome-specific timing/citation populations. Ask why a zero-eligible report cannot
-honestly claim 100% hit rate. Wait before the next component. Commit/push summaries
-at the learner's request. Codex explained that zero eligible cases means undefined
-metrics. Next: add an explicit evaluation CLI/report
-boundary; formal question/label creation still requires separate agreement.
+The learner requested progression/publication after the zero-denominator question.
+Codex explained that zero eligible cases means undefined metrics, then implemented
+CLI evaluation and synthetic tests. Independent reasoning about this remains
+unverified. No formal question set or independent human labels were created.
 
-No formal dataset, benchmark quality result, evaluation CLI, representative latency
+Next: walk through evaluate's loader → runner → summary → JSON/exit-code flow and
+the installed-command check. Ask why exit 0 is not proof of good retrieval. Wait
+before a new component. Review actual baseline behavior and explicitly agree on
+future evaluation data/labels and a fixed snapshot before producing quality claims.
+The formal ten-question set still requires separate agreement.
+
+No formal dataset, benchmark quality result, representative latency
 measurement, embeddings, hybrid ranking, model inference, or API exists. Unit tests
 verify software behavior, not retrieval quality. Aggregate numbers on synthetic
 fixtures must never be promoted into benchmark results.
@@ -83,3 +98,8 @@ assume runner-produced data. No references means no citation-validity credit.
 
 Python 3.12.13 is available; Ollama/model state was last inspected at project setup
 and must be rechecked before any local-model selection or download.
+
+CLI reports include private source/questions/provenance and local paths. They are
+printed only, not saved automatically. Exit status reports execution conditions,
+not a quality threshold. Per-case errors keep reports; invalid setup/input fails
+before a run. Error > unknown > stale > current determines the non-argument exit.

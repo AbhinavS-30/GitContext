@@ -348,3 +348,17 @@ completed before a subsequent error, but never fabricate blocked ranking times.
 Shared setup stays separate. This pure summary adds no CLI, saving, dataset cases,
 or measured quality claim. Use synthetic tests with unequal label counts to verify
 that macro recall is not accidentally implemented as pooled recall.
+
+## 2026-11-23: explicit evaluation CLI
+
+Add evaluate ROOT --dataset INPUT --split development|held_out --top-k N and emit
+an evaluation-report-v1 envelope with the detailed run plus summary. Serialize
+typed nested data through Pydantic in this branch only, avoiding extra report-schema
+setup on unrelated commands. No output-file flag, auto-save, tuning, refresh, or
+generated evaluation cases are introduced.
+
+Keep operational status separate from quality: current execution can exit 0 with
+no hits or no positive-label denominator. Per-case errors retain reports and exit
+1; setup errors fail explicitly. Argument errors use 2, unknown uses 4, stale uses
+3, with priority error > unknown > stale > current. Reports retain private evidence
+and provenance; output is local and should not enter public Git tracking.

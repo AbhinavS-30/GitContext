@@ -7,8 +7,8 @@ small Python repositories and selected Markdown documentation.
 Python functions with tests. Python and Markdown chunking are also implemented.
 In-memory snapshot inventories and read-only Git context are implemented.
 Validated local snapshot saving/loading and lexical CLI search are implemented.
-The CLI supports indexing, inspection, status, explicit refresh, and search with
-mandatory source-freshness checks. Model generation is not implemented.
+The CLI supports indexing, inspection, status, explicit refresh, freshness-checked
+search, and evaluation of supplied cases. Model generation is not implemented.
 
 For a component-by-component explanation, see [the walkthrough](docs/WALKTHROUGH.md).
 
@@ -22,6 +22,7 @@ gitcontext inspect /path/to/repository
 gitcontext status /path/to/repository
 gitcontext refresh /path/to/repository
 gitcontext search /path/to/repository "save record" --top-k 5
+gitcontext evaluate /path/to/repository --dataset /path/to/evaluation.json --split development
 ```
 
 `python -m gitcontext` supports the same commands. Output is JSON. Data lives at
@@ -499,8 +500,7 @@ The loader caps regular-file JSON at 1 MB and 1,000 cases. The runner validates
 inputs, executes only the explicitly selected split, reloads/checks source for
 each case, and retains current/blocked/error observations with metrics, timing,
 reference checks, and provenance. Nothing is refreshed, tuned, or saved automatically.
-Aggregate summaries are available through the Python API; an evaluation CLI remains
-unimplemented. No formal dataset or
+Aggregate summaries are available through the Python API and evaluation CLI below. No formal dataset or
 measured retrieval quality exists. See the contract for timing boundaries and
 review/held-out limitations; a schema-valid review declaration is not verified review.
 
@@ -512,3 +512,28 @@ produce undefined metrics rather than 0% or 100%. The summary retains dataset,
 snapshot, split, policy, and degraded-state context. It does not execute queries,
 label evidence, save reports, or establish retrieval quality. See EVALUATION.md
 for exact denominators; tests use synthetic observations, not formal benchmarks.
+
+## Evaluation CLI
+
+```sh
+gitcontext evaluate /path/to/repository --dataset /path/to/evaluation.json --split development --top-k 5
+```
+
+The dataset must already be supplied in evaluation-input-v1 format and match the
+saved snapshot. No populated input file or formal questions are bundled. Split is
+required: development or held_out. The command prints evaluation-report-v1 JSON
+with both the detailed run and aggregate summary; it never silently creates data,
+saves reports, tunes retrieval, or refreshes source. Output contains questions,
+labels, source snippets, and local paths: retain reports privately and out of Git.
+
+Exit 0 means the selected cases completed with current source, not that retrieval
+quality passed a threshold. Current no-hit or unscored unsupported/unlabelled cases
+can exit 0. Per-case errors exit 1 with the full report; setup/input errors exit 1
+with an error instead of invented observations. Invalid arguments exit 2. Unknown
+observations exit 4, otherwise stale observations exit 3; errors take priority over
+unknown, then stale. All attempted selected cases remain in a valid run report.
+
+Reported timing boundaries are documented in EVALUATION.md; they exclude CLI
+startup/report serialization. Source freshness and reference validity do not prove
+relevance or answer correctness. Real labels, review provenance, dataset independence,
+and representative measurements must be established before claiming quality.
