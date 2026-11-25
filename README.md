@@ -98,7 +98,8 @@ autonomous code editing is planned. File allowlists and exclusions cannot guaran
 that every secret is detected. Generated indexes may contain source text and must
 remain local and untracked.
 
-There is no evaluation dataset or measured retrieval quality yet.
+Three development-only draft cases now await label review; there is no formal
+evaluation dataset or measured retrieval quality.
 
 See [the plan](docs/PLAN.md), [current status](docs/STATUS.md), and
 [design decisions](docs/DECISIONS.md).
@@ -478,7 +479,8 @@ answers are included in this baseline.
 [docs/EVALUATION.md](docs/EVALUATION.md) defines dataset/label provenance, snapshot
 compatibility, hit/recall denominators, blocked/error reporting, latency boundaries,
 citation checks, and the distinction between relevance and answer correctness.
-No formal questions, labels, benchmark run, or retrieval quality results exist.
+No formal ten-question set, reviewed relevance labels, benchmark run, or retrieval
+quality results exist. Development-only draft labels are linked below.
 
 `evaluation.metrics_at_k` implements per-observation hit and recall arithmetic for
 supplied ranked IDs and relevance labels. It requires explicit current/stale/
@@ -522,7 +524,8 @@ gitcontext evaluate /path/to/repository --dataset /path/to/evaluation.json --spl
 ```
 
 The dataset must already be supplied in evaluation-input-v1 format and match the
-saved snapshot. No populated input file or formal questions are bundled. Split is
+saved snapshot. No formal questions are bundled; development-only drafts await
+review as described below. Split is
 required: development or held_out. The command prints evaluation-report-v1 JSON
 with both the detailed run and aggregate summary; it never silently creates data,
 saves reports, tunes retrieval, or refreshes source. Output contains questions,
@@ -539,3 +542,18 @@ Reported timing boundaries are documented in EVALUATION.md; they exclude CLI
 startup/report serialization. Source freshness and reference validity do not prove
 relevance or answer correctness. Real labels, review provenance, dataset independence,
 and representative measurements must be established before claiming quality.
+
+## Development-only label review
+
+At the user's request, `evaluation/development/gitcontext-548076a.draft.json`
+contains three Codex-authored draft cases bound to a fixed source export. Read
+[evaluation/development/REVIEW.md](evaluation/development/REVIEW.md) for questions,
+source references, rationale, provenance, and limitations. All cases are development,
+not_reviewed, with no claimed human reviewer. The formal ten-question set remains
+deferred. No retrieval scores were calculated for these drafts.
+
+Private source/index artifacts are under ignored `.gitcontext/`; the draft JSON
+contains only questions/metadata/chunk IDs, not source text or absolute local paths.
+Snapshot matching and membership validation passed; that does not prove relevance
+or completeness. Review intent and evidence scope before scoring. Do not promote
+these exposed cases to independent held-out evaluation after tuning.

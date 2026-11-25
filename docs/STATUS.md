@@ -30,6 +30,12 @@ the worktree was clean with no pending commit. Codex performed a development-onl
 identifier review on a temporary GitContext export of that commit and documented
 it in docs/BASELINE_REVIEW.md. No app code, weights, questions, or labels changed.
 
+Development review is published as dcfdb2b with passing CI. The user then explicitly
+selected development-only cases and label review. Codex prepared three draft cases
+and rationales in evaluation/development/, against a fixed source export of 548076a.
+All are development/not_reviewed, authored by Codex; no human review is claimed.
+No formal ten-question set, ranking change, or retrieval scoring was created.
+
 ## Verification and publication
 
 - pytest: 310 passed (298 existing cases plus 12 evaluation CLI cases).
@@ -53,10 +59,16 @@ it in docs/BASELINE_REVIEW.md. No app code, weights, questions, or labels change
 - The source export had no Git metadata; source commit provenance is documented
   separately. Temporary source and saved snapshot were removed. No raw index/data
   enters Git. Runtime/configuration and limitations are in the review document.
-- Documentation-only changes: search review and whitespace checks were run; local
-  software tests were not repeated unnecessarily. The existing baseline is 310
-  passing tests from the preceding step/CI. This status accompanies the requested
-  documentation commit; the session handoff records push and CI results.
+- Development draft: strict loader accepted three cases and four unique chunk
+  references against snapshot-v2:50bf1719…; all review statuses remain not_reviewed.
+  Source freshness is current. Code was read as data; no queries/evaluation ran.
+- The persistent private export is nested in the worktree, so Git observation is
+  root_is_subdirectory, not the earlier temporary export's repository_unresolved.
+  The source commit/chunk IDs match; differing snapshot provenance is documented.
+- The learner explicitly requested publishing the development drafts. This status
+  accompanies draft-v1 publication; no human review or evaluation result is implied.
+  Strict input/membership/freshness and whitespace checks passed. Source/index
+  artifacts remain ignored; the existing software baseline is 310 passing tests.
 
 ## Learning record
 
@@ -90,12 +102,18 @@ The learner asked to progress after the execution-versus-quality question. Codex
 explained that exit 0 does not certify retrieval quality. Codex reviewed baseline
 behavior without changing ranking. Independent relevance review has not occurred.
 
-Next: explain equal-term ties and the difference between definition, usage, and
-documentation intent. Agree on development-only cases/label review or explicitly
-revisit formal evaluation scope before creating the deferred ten-question set.
-A preference question is pending; no answer is assumed and no formal cases exist.
+The user selected development-only cases and label review. That authorizes draft
+preparation, not a claim that a human reviewed their relevance. Codex chose narrow
+mechanism questions and implementation evidence; one whole-function case has two
+fragments. Independent relevance/completeness review is pending.
 
-No formal dataset, benchmark quality result, representative latency
+Next: review the first case's question and proposed save_snapshot evidence with
+the learner, then the other two cases. Discuss whether direct implementation is
+sufficient or documents/helpers should count under the intended task. Record actual
+feedback and version label changes. Do not score before review or silently promote
+draft labels to human_reviewed. The formal ten-question set remains deferred.
+
+No formal dataset, reviewed relevance dataset, benchmark quality result, representative latency
 measurement, embeddings, hybrid ranking, model inference, or API exists. Unit tests
 verify software behavior, not retrieval quality. Aggregate numbers on synthetic
 fixtures must never be promoted into benchmark results.

@@ -1,4 +1,4 @@
-# Evaluation contract v1 — no dataset or measured quality yet
+# Evaluation contract v1 — development drafts only; no measured quality
 
 This document defines evaluation inputs, the lexical runner, and metric arithmetic.
 It contains no formal questions, relevance labels, benchmark runs, or quality
@@ -129,7 +129,7 @@ non-symlink file, reads at most 1,000,000 bytes plus one overflow probe, validat
 its JSON/snapshot binding, and rejects more than 1,000 cases. It never creates
 questions or labels. Caller-owned input files should stay outside indexed supported
 source and remain private. JSON format is documented by the input models; no
-populated example/formal dataset file is supplied.
+formal dataset file is supplied. Development-only drafts are described below.
 
 `run_evaluation(snapshot_path, dataset_path, root, split=..., k=5)` requires explicit
 development or held_out selection and k from 1–100. Input/setup failures raise
@@ -224,3 +224,20 @@ errors/unknowns. Per-case failures retain a full report. Invalid setup/input fai
 before queries and returns an explicit error, not a fabricated run. Snapshot and
 input files remain unchanged. This CLI does not validate that declared human
 review happened, repair stale labels, or make held-out data independent by itself.
+
+## Development draft authorized November 24
+
+The user explicitly selected development-only cases and label review. The three
+records in evaluation/development/gitcontext-548076a.draft.json are Codex-authored
+proposals against the snapshot named in that file. Every record is development and
+not_reviewed, with no human reviewer. REVIEW.md gives source/label rationale and
+external source-commit provenance. No formal ten-question set was created, and no
+retrieval metrics or evaluation run were calculated for these draft labels.
+
+Strict schema/reference checks establish only consistency. These labels intentionally
+focus on direct implementation and are not exhaustive labels for every useful
+chunk. Review their scope/completeness with the learner before interpreting recall.
+Human review status cannot be inferred from choosing this workflow or opening files.
+A local ignored source export and snapshot support inspection; do not commit those
+artifacts or silently reuse IDs against a different snapshot. Development exposure
+and future tuning rule out claiming held-out independence for these cases.
