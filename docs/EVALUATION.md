@@ -229,10 +229,12 @@ review happened, repair stale labels, or make held-out data independent by itsel
 
 The user explicitly selected development-only cases and label review. The three
 records in evaluation/development/gitcontext-548076a.draft.json are Codex-authored
-proposals against the snapshot named in that file. Every record is development and
-not_reviewed, with no human reviewer. REVIEW.md gives source/label rationale and
-external source-commit provenance. No formal ten-question set was created, and no
-retrieval metrics or evaluation run were calculated for these draft labels.
+proposals against the snapshot named in that file. Every record is development. Draft-v1 was not_reviewed; draft-v2 records Codex
+source review only (codex_reviewed/reviewer=Codex), not human review. REVIEW.md gives source/label rationale and
+external source-commit provenance. The formal ten-question set remains deferred. One default-top-5 diagnostic using
+unchanged question/reference labels is recorded in PROVISIONAL_RESULTS.md. Its
+metrics are provisional and conditioned on these Codex-authored narrow labels,
+not held-out or independently human-validated quality.
 
 Strict schema/reference checks establish only consistency. These labels intentionally
 focus on direct implementation and are not exhaustive labels for every useful
@@ -241,3 +243,12 @@ Human review status cannot be inferred from choosing this workflow or opening fi
 A local ignored source export and snapshot support inspection; do not commit those
 artifacts or silently reuse IDs against a different snapshot. Development exposure
 and future tuning rule out claiming held-out independence for these cases.
+
+The first provisional run had three current/eligible cases but zero draft-labeled
+implementation chunks in their top-five results. Documentation occupied all 15
+slots; reference checks passed, which does not make the results relevant under
+implementation-only labels or irrelevant for broader explanatory intent. Preserve
+this outcome; do not change labels retrospectively to manufacture gains. When the
+user asked for a preference, Codex recommended retaining implementation as primary
+for these cases and documentation as supporting evidence. No label/ranking change
+followed that recommendation. Human review remains pending.

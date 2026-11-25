@@ -2,11 +2,13 @@
 
 The user selected development-only cases and label review on November 24, 2026.
 `gitcontext-548076a.draft.json` contains three Codex-authored draft cases, all in the
-development split. Every case is not_reviewed with reviewer=null. No independent
-human review, held-out status, retrieval score, or quality claim is implied.
+development split. The initial draft-v1 was not_reviewed with reviewer=null.
+Draft-v2 records a separate Codex source review (codex_reviewed/reviewer=Codex).
+Human review remains pending; no held-out or independent quality claim is implied.
 
-The formal ten-question evaluation set remains deferred. No evaluation run or
-result artifact is included. Do not report draft-label metrics as measured quality.
+The formal ten-question evaluation set remains deferred. A provisional run is
+documented in PROVISIONAL_RESULTS.md; raw results stay private and ignored. Do not
+report draft-label metrics as general or independently measured quality.
 
 ## Source provenance and label scope
 
@@ -50,7 +52,16 @@ strict input validation, snapshot matching, and reference membership checks. The
 private source remained current during preparation. This does not establish that
 the questions or labels are good; that is the purpose of review.
 
-## Review before scoring
+## Review and version history
+
+Draft-v1 was published in 0198fd1 before scoring. On the user's request to progress,
+Codex reviewed the narrow labels against source: save_snapshot contains the ordered
+temporary-write/verification/replace workflow; both freshness fragments cover the
+whole decision/report function; the selected main fragment contains the freshness
+gate and early return before ranking. That is Codex review, not human validation.
+Draft-v2 updates review/provenance metadata only; question and chunk-ID labels are
+unchanged. One default-top-5 provisional run followed. No labels changed afterward.
+The original fixed-source preparation and the provisional run are separate steps.
 
 For each case, check the intended developer task, read the proposed source, and
 decide whether necessary evidence is missing or irrelevant evidence is included.
@@ -59,10 +70,16 @@ label rule. Keep all these cases development-only after inspection/tuning.
 
 Do not change review_status to human_reviewed merely because the file was opened,
 the schema validated, or the learner selected development-only work. Record actual
-review scope and reviewer only after explicit feedback; otherwise leave not_reviewed.
+human review scope and reviewer only after actual feedback. Codex-only source
+review must remain explicitly codex_reviewed; it cannot be promoted to human review.
 If labels change, increment dataset_version and document why. If source/config
 changes, rebuild/bind against the correct snapshot and revalidate labels.
 
 All three cases are supported, so this draft cannot evaluate unsupported behavior,
 broad question coverage, unseen-code generalization, or production retrieval quality.
 No ranking weights, filters, rerankers, or models were changed to favor these cases.
+
+After the run, the user asked which relevance rule Codex preferred. The recommendation
+is to keep implementation as the primary target for these narrow mechanism cases,
+with documentation as supporting evidence. This retains the original label scope;
+it is not human label review and does not change the dataset after scoring.

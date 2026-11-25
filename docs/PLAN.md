@@ -124,3 +124,12 @@ provenance and identifier-result ordering. Equal coverage tied definitions/impor
 docs and exposed the effect of path ordering. Ranking is unchanged. Next requires
 agreement on development labels or explicit authorization to begin the deferred
 formal set; no measured relevance or performance claims are made.
+
+The user selected development-only cases/label review. Three draft cases were
+published as draft-v1; draft-v2 records Codex source review with questions/reference
+labels unchanged. A single provisional top-five run missed every narrow labelled
+implementation target while returning related documentation. This qualified result
+is preserved in evaluation/development/PROVISIONAL_RESULTS.md; no general quality,
+human-review, held-out, or timing claim follows. Ranking remains unchanged. Next:
+explain and compare one justified lexical-ranking experiment against the fixed
+baseline, retaining scope/provenance and exposing trade-offs. Formal set stays deferred.

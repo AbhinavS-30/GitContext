@@ -1,17 +1,17 @@
 {
   "schema_version": "evaluation-input-v1",
   "dataset_id": "gitcontext-development-548076a",
-  "dataset_version": "draft-v1",
+  "dataset_version": "draft-v2",
   "snapshot_id": "snapshot-v2:50bf1719bb31faf1467fe9194c86b0111a5b13ddf2c92178f125a7bc3dcd9032",
-  "labeling_rules": "Draft direct-implementation evidence for narrow mechanisms. For whole-function questions include all fragments of that function; for a narrow branch include the containing fragment. Documentation/imports/call sites are not exhaustively labeled. Await learner review before scoring or making quality claims.",
+  "labeling_rules": "Draft direct-implementation evidence for narrow mechanisms. For whole-function questions include all fragments of that function; for a narrow branch include the containing fragment. Documentation/imports/call sites are not exhaustively labeled. Codex source review completed for this narrow rule; human review remains pending. At the user's request, provisional development diagnostics may be run with limitations, never presented as independent quality evidence.",
   "limitations": [
-    "Three Codex-authored development cases; relevance judgments are drafts, not independent human labels.",
+    "Three Codex-authored development cases, source-reviewed by Codex only; not independent human labels.",
     "No held-out independence: source and related identifier diagnostics have already been inspected.",
     "Labels select direct implementation evidence, not every potentially useful explanatory chunk; recall is relative to these narrow labels only.",
     "All cases are supported; unsupported behavior and broader task coverage are not represented.",
     "Source export is GitContext commit 548076ad03eb936c61b8d7540feb65d5da8f60e2. Local export has no own Git repository; ancestor rejection is recorded as root_is_subdirectory.",
     "Runtime/chunking configuration is fixed in the snapshot; a different snapshot or parser/policy requires revalidation.",
-    "Review and scoring are separate. No evaluation run, quality score, latency report, or formal ten-question set is supplied."
+    "Provisional development diagnostics may use these fixed draft labels; no formal ten-question set, held-out independence, or human-validated quality is implied."
   ],
   "cases": [
     {
@@ -24,8 +24,8 @@
         "chunk-v1:f0eed07d4ea5aa5913e27825641ae211351ce83cc466ad4d058962a5ff2908e4"
       ],
       "label_author": "Codex (draft development labels)",
-      "review_status": "not_reviewed",
-      "reviewer": null
+      "review_status": "codex_reviewed",
+      "reviewer": "Codex"
     },
     {
       "case_id": "dev-freshness-states",
@@ -38,8 +38,8 @@
         "chunk-v1:5ed676d8fbf1f8a58d60aaba419647a74a1d51ba92cf71b9143e4da943159540"
       ],
       "label_author": "Codex (draft development labels)",
-      "review_status": "not_reviewed",
-      "reviewer": null
+      "review_status": "codex_reviewed",
+      "reviewer": "Codex"
     },
     {
       "case_id": "dev-search-freshness-gate",
@@ -51,8 +51,8 @@
         "chunk-v1:c03c71711ef1abf74578ccfd351a8bc757256bdb4fc4e806036d76185db9a895"
       ],
       "label_author": "Codex (draft development labels)",
-      "review_status": "not_reviewed",
-      "reviewer": null
+      "review_status": "codex_reviewed",
+      "reviewer": "Codex"
     }
   ]
 }

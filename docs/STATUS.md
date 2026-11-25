@@ -33,8 +33,10 @@ it in docs/BASELINE_REVIEW.md. No app code, weights, questions, or labels change
 Development review is published as dcfdb2b with passing CI. The user then explicitly
 selected development-only cases and label review. Codex prepared three draft cases
 and rationales in evaluation/development/, against a fixed source export of 548076a.
-All are development/not_reviewed, authored by Codex; no human review is claimed.
-No formal ten-question set, ranking change, or retrieval scoring was created.
+Draft-v1 was published as 0198fd1. Draft-v2 records Codex source review only;
+question and reference labels are unchanged, and no human review is claimed.
+A provisional top-five diagnostic is now documented with full limitations. No
+formal ten-question set or ranking/source change was created.
 
 ## Verification and publication
 
@@ -59,16 +61,23 @@ No formal ten-question set, ranking change, or retrieval scoring was created.
 - The source export had no Git metadata; source commit provenance is documented
   separately. Temporary source and saved snapshot were removed. No raw index/data
   enters Git. Runtime/configuration and limitations are in the review document.
-- Development draft: strict loader accepted three cases and four unique chunk
-  references against snapshot-v2:50bf1719…; all review statuses remain not_reviewed.
-  Source freshness is current. Code was read as data; no queries/evaluation ran.
+- Development input: three cases/four unique references passed exact snapshot,
+  membership, and freshness checks. Codex reviewed the narrow source mechanisms;
+  metadata changed to draft-v2/codex_reviewed before scoring, not human_reviewed.
+- Provisional top-five run: attempted/current/eligible=3, no stale/unknown/error;
+  zero draft-labeled implementation hits and macro recall 0. All 15 returned
+  references matched saved metadata; documentation occupied every top-five slot.
+  These are conditional development diagnostics, not general or independent quality.
+- Exact input was unchanged after the run and matches the raw report's dataset.
+  The raw report remains private/ignored; a qualified summary/rationale is public.
 - The persistent private export is nested in the worktree, so Git observation is
   root_is_subdirectory, not the earlier temporary export's repository_unresolved.
   The source commit/chunk IDs match; differing snapshot provenance is documented.
-- The learner explicitly requested publishing the development drafts. This status
-  accompanies draft-v1 publication; no human review or evaluation result is implied.
-  Strict input/membership/freshness and whitespace checks passed. Source/index
-  artifacts remain ignored; the existing software baseline is 310 passing tests.
+- The learner requested publication/progression. Draft-v1 was pushed as 0198fd1;
+  this status accompanies draft-v2 review metadata and the provisional results note.
+  Source/index/raw-report artifacts remain ignored. App code is unchanged; schema,
+  source checks, actual evaluate execution, and whitespace checks were run. The
+  software baseline remains 310 tests; session handoff records push/CI results.
 
 ## Learning record
 
@@ -107,13 +116,21 @@ preparation, not a claim that a human reviewed their relevance. Codex chose narr
 mechanism questions and implementation evidence; one whole-function case has two
 fragments. Independent relevance/completeness review is pending.
 
-Next: review the first case's question and proposed save_snapshot evidence with
-the learner, then the other two cases. Discuss whether direct implementation is
-sufficient or documents/helpers should count under the intended task. Record actual
-feedback and version label changes. Do not score before review or silently promote
-draft labels to human_reviewed. The formal ten-question set remains deferred.
+The learner requested publication/progression without giving label judgments.
+Codex explained the first case's narrow workflow scope, reviewed all three proposed
+source mechanisms, and recorded Codex review only. The first diagnostic was preserved
+without post-result label/ranking changes. When asked for a relevance preference,
+the user asked Codex's preference; Codex recommended retaining implementation as
+primary for these cases, with docs as support. This is not human relevance review.
 
-No formal dataset, reviewed relevance dataset, benchmark quality result, representative latency
+Next: walk through the provisional misses and why traceable documentation can still
+miss a narrow implementation target. Keep draft-v2 and the baseline outcome fixed.
+Explain one candidate ranking experiment before implementation, with intended effects,
+trade-offs, and comparison rules. Ask one understanding question, then wait. Do not
+claim general gains from three exposed development cases or create the deferred
+formal set. Independent label/scope review remains pending.
+
+No formal dataset, human-reviewed relevance dataset, general benchmark quality result, representative latency
 measurement, embeddings, hybrid ranking, model inference, or API exists. Unit tests
 verify software behavior, not retrieval quality. Aggregate numbers on synthetic
 fixtures must never be promoted into benchmark results.

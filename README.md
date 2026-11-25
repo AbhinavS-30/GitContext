@@ -98,8 +98,8 @@ autonomous code editing is planned. File allowlists and exclusions cannot guaran
 that every secret is detected. Generated indexes may contain source text and must
 remain local and untracked.
 
-Three development-only draft cases now await label review; there is no formal
-evaluation dataset or measured retrieval quality.
+Three development-only cases have a Codex source review and provisional diagnostic;
+human label review, the formal set, and independently validated quality remain absent.
 
 See [the plan](docs/PLAN.md), [current status](docs/STATUS.md), and
 [design decisions](docs/DECISIONS.md).
@@ -471,7 +471,8 @@ still be searched. Scores do not prove an answer is correct or supported in mean
 Empty/unmatched queries return an empty matches list with exit 0 after freshness
 passes. Queries over 2,000 characters and --top-k outside 1–100 are argument errors
 (exit 2); default top_k is 5. Search does not mutate the saved snapshot. Retrieval
-quality is not yet measured; no BM25, semantic search, hybrid ranking, or model
+quality is not established beyond the provisional development diagnostic below;
+no BM25, semantic search, hybrid ranking, or model
 answers are included in this baseline.
 
 ## Evaluation preparation
@@ -549,11 +550,14 @@ At the user's request, `evaluation/development/gitcontext-548076a.draft.json`
 contains three Codex-authored draft cases bound to a fixed source export. Read
 [evaluation/development/REVIEW.md](evaluation/development/REVIEW.md) for questions,
 source references, rationale, provenance, and limitations. All cases are development,
-not_reviewed, with no claimed human reviewer. The formal ten-question set remains
-deferred. No retrieval scores were calculated for these drafts.
+codex_reviewed in draft-v2, with Codex as reviewer and no claimed human review.
+The formal ten-question set remains deferred. A single provisional run against
+these narrow labels is disclosed in
+[evaluation/development/PROVISIONAL_RESULTS.md](evaluation/development/PROVISIONAL_RESULTS.md).
 
 Private source/index artifacts are under ignored `.gitcontext/`; the draft JSON
 contains only questions/metadata/chunk IDs, not source text or absolute local paths.
 Snapshot matching and membership validation passed; that does not prove relevance
-or completeness. Review intent and evidence scope before scoring. Do not promote
+or completeness. The diagnostic does not replace human scope/relevance review.
+Do not promote
 these exposed cases to independent held-out evaluation after tuning.
