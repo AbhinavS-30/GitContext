@@ -117,3 +117,10 @@ command passed synthetic current/stale/unknown execution and read-only checks.
 Next: review the end-to-end baseline and agree on actual development evaluation
 data/labels and their fixed snapshot before claiming quality or adding complexity.
 The formal ten-question set has not been created.
+
+November 24: reviewed the installed lexical CLI on a fixed GitContext source export
+without creating relevance labels. docs/BASELINE_REVIEW.md records corpus/config
+provenance and identifier-result ordering. Equal coverage tied definitions/imports/
+docs and exposed the effect of path ordering. Ranking is unchanged. Next requires
+agreement on development labels or explicit authorization to begin the deferred
+formal set; no measured relevance or performance claims are made.

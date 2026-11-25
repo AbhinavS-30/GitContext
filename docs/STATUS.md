@@ -1,6 +1,6 @@
 # Status
 
-Updated: November 23, 2026. Phase 2 complete; Phase 3 in progress.
+Updated: November 24, 2026. Phase 2 complete; Phase 3 in progress.
 
 ## Current implementation
 
@@ -25,6 +25,11 @@ and 12 integration tests. It requires supplied data and explicit split, emits
 versioned detailed-run/summary JSON, and preserves execution-status exit codes.
 It does not generate cases, save reports automatically, or refresh snapshots.
 
+Evaluation CLI is published as 548076a with passing CI. At this session start,
+the worktree was clean with no pending commit. Codex performed a development-only
+identifier review on a temporary GitContext export of that commit and documented
+it in docs/BASELINE_REVIEW.md. No app code, weights, questions, or labels changed.
+
 ## Verification and publication
 
 - pytest: 310 passed (298 existing cases plus 12 evaluation CLI cases).
@@ -41,8 +46,17 @@ It does not generate cases, save reports automatically, or refresh snapshots.
 - Tests cover versioned serialization, explicit split/no other-split case leakage,
   no-hit success, setup mismatch, per-case error reports, arguments, symlink input,
   blocked populations, and preservation of input/snapshot bytes.
-- The learner requested publication/progression. This status accompanies the
-  evaluation CLI commit; the session handoff records ID, push, and remote CI result.
+- Actual fixed-export CLI review: 43 supported files, 588 chunks, complete and
+  not degraded; current freshness for three identifier diagnostics. Named function
+  chunk positions were 4 (save_snapshot), 6 (check_freshness), and 7 (rank_chunks).
+  These are mechanical observations, not relevance labels or benchmark scores.
+- The source export had no Git metadata; source commit provenance is documented
+  separately. Temporary source and saved snapshot were removed. No raw index/data
+  enters Git. Runtime/configuration and limitations are in the review document.
+- Documentation-only changes: search review and whitespace checks were run; local
+  software tests were not repeated unnecessarily. The existing baseline is 310
+  passing tests from the preceding step/CI. This status accompanies the requested
+  documentation commit; the session handoff records push and CI results.
 
 ## Learning record
 
@@ -72,11 +86,14 @@ Codex explained that zero eligible cases means undefined metrics, then implement
 CLI evaluation and synthetic tests. Independent reasoning about this remains
 unverified. No formal question set or independent human labels were created.
 
-Next: walk through evaluate's loader → runner → summary → JSON/exit-code flow and
-the installed-command check. Ask why exit 0 is not proof of good retrieval. Wait
-before a new component. Review actual baseline behavior and explicitly agree on
-future evaluation data/labels and a fixed snapshot before producing quality claims.
-The formal ten-question set still requires separate agreement.
+The learner asked to progress after the execution-versus-quality question. Codex
+explained that exit 0 does not certify retrieval quality. Codex reviewed baseline
+behavior without changing ranking. Independent relevance review has not occurred.
+
+Next: explain equal-term ties and the difference between definition, usage, and
+documentation intent. Agree on development-only cases/label review or explicitly
+revisit formal evaluation scope before creating the deferred ten-question set.
+A preference question is pending; no answer is assumed and no formal cases exist.
 
 No formal dataset, benchmark quality result, representative latency
 measurement, embeddings, hybrid ranking, model inference, or API exists. Unit tests

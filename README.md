@@ -11,6 +11,8 @@ The CLI supports indexing, inspection, status, explicit refresh, freshness-check
 search, and evaluation of supplied cases. Model generation is not implemented.
 
 For a component-by-component explanation, see [the walkthrough](docs/WALKTHROUGH.md).
+For observed development behavior on a fixed source export, see the
+[baseline review](docs/BASELINE_REVIEW.md). It is not a labeled benchmark.
 
 ## CLI usage
 
