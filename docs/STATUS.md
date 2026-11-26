@@ -1,6 +1,6 @@
 # Status
 
-Updated: November 24, 2026. Phase 2 complete; Phase 3 in progress.
+Updated: November 25, 2026. Phase 2 complete; Phase 3 in progress.
 
 ## Current implementation
 
@@ -39,6 +39,12 @@ A provisional top-five diagnostic is now documented with full limitations. No
 formal ten-question set or ranking/source change was created.
 
 ## Verification and publication
+
+The development drafts and provisional results are published as 0198fd1/16b1826
+with passing CI (310 tests). Current session: inspected clean Git state and read
+the primary Robertson/Zaragoza BM25 reference. docs/BM25_EXPERIMENT.md records a
+candidate hypothesis and fixed-comparison rules. No app code, ranking, labels,
+dependencies, or results changed. Only proposal/status documentation is local.
 
 - pytest: 310 passed (298 existing cases plus 12 evaluation CLI cases).
 - Ruff lint and formatting: passed. Git diff whitespace check: passed.
@@ -123,12 +129,13 @@ without post-result label/ranking changes. When asked for a relevance preference
 the user asked Codex's preference; Codex recommended retaining implementation as
 primary for these cases, with docs as support. This is not human relevance review.
 
-Next: walk through the provisional misses and why traceable documentation can still
-miss a narrow implementation target. Keep draft-v2 and the baseline outcome fixed.
-Explain one candidate ranking experiment before implementation, with intended effects,
-trade-offs, and comparison rules. Ask one understanding question, then wait. Do not
-claim general gains from three exposed development cases or create the deferred
-formal set. Independent label/scope review remains pending.
+Next: explain BM25 term rarity, frequency saturation, and length normalization;
+ask why common-across-corpus terms should distinguish chunks less than rare terms,
+then wait before implementation. Record exact variant/parameters before comparison.
+Keep draft-v2 and the original outcome fixed. Do not claim general gains from three
+exposed development cases or create the deferred formal set. Independent human
+label/scope review remains pending. No new learner understanding is inferred from
+the request to move forward.
 
 No formal dataset, human-reviewed relevance dataset, general benchmark quality result, representative latency
 measurement, embeddings, hybrid ranking, model inference, or API exists. Unit tests

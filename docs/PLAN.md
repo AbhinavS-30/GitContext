@@ -133,3 +133,8 @@ is preserved in evaluation/development/PROVISIONAL_RESULTS.md; no general qualit
 human-review, held-out, or timing claim follows. Ranking remains unchanged. Next:
 explain and compare one justified lexical-ranking experiment against the fixed
 baseline, retaining scope/provenance and exposing trade-offs. Formal set stays deferred.
+
+November 25: docs/BM25_EXPERIMENT.md proposes one controlled lexical comparison
+and records the motivation/trade-offs. No BM25 implementation or new results yet.
+Next: establish understanding of term rarity/saturation/length normalization, then
+record the exact variant/configuration and build the candidate in a small step.
