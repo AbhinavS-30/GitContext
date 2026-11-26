@@ -138,3 +138,10 @@ November 25: docs/BM25_EXPERIMENT.md proposes one controlled lexical comparison
 and records the motivation/trade-offs. No BM25 implementation or new results yet.
 Next: establish understanding of term rarity/saturation/length normalization, then
 record the exact variant/configuration and build the candidate in a small step.
+
+November 25: the fixed specification was published as 01e54a7, then an opt-in BM25
+candidate was implemented and checked (337 tests). Both methods missed all three
+draft implementation targets at k=5; overlap remains default. The comparison is
+recorded in evaluation/development/BM25_COMPARISON.md without label/parameter edits.
+Next: review vocabulary/evidence mismatch before agreeing another experiment.
+Phase 3 continues; no formal set, human review, or general retrieval gain is claimed.

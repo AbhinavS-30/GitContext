@@ -362,3 +362,18 @@ no hits or no positive-label denominator. Per-case errors retain reports and exi
 1; setup errors fail explicitly. Argument errors use 2, unknown uses 4, stale uses
 3, with priority error > unknown > stale > current. Reports retain private evidence
 and provenance; output is local and should not enter public Git tracking.
+
+## 2026-11-25: explicit BM25 candidate, preserve negative comparison
+
+Publish the specification before implementation/results (01e54a7). Use positive
+log1p IDF, k1=1.2, b=0.75, unique query terms, expanded-token occurrence counts,
+and nonempty chunks as documents. Preserve deterministic source-order ties.
+No dependencies, stopwords, label fitting, or model inference are added. Recompute
+statistics per call and include that work in ranking time. Keep snapshot identity
+and the overlap algorithm unchanged; expose actual method/parameters in reports.
+
+Keep overlap as default. Both methods missed all three fixed draft implementation
+targets at k=5; changed ordering is not a gain. Do not tune parameters or relabel
+results afterward. Preserve the qualified comparison in
+ evaluation/development/BM25_COMPARISON.md. Broader development coverage and human
+scope review remain necessary; the formal ten-question set remains deferred.

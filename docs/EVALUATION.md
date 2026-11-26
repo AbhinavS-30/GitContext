@@ -252,3 +252,19 @@ this outcome; do not change labels retrospectively to manufacture gains. When th
 user asked for a preference, Codex recommended retaining implementation as primary
 for these cases and documentation as supporting evidence. No label/ranking change
 followed that recommendation. Human review remains pending.
+
+## Explicit lexical comparison modes
+
+Search and evaluate accept --ranking overlap|bm25, default overlap. BM25 uses the
+fixed bm25-positive-idf-v1 specification in BM25_EXPERIMENT.md (k1=1.2, b=0.75).
+Both use the same tokenizer, snapshot, freshness gate, reference checks, and cutoff.
+Evaluation runs now use lexical-evaluation-v2 and expose lexical_method,
+ranking_version, and ranking_parameters; summaries preserve method/parameters.
+The outer evaluation-report-v1 envelope remains unchanged. Baseline scores remain
+integer overlap counts; BM25 scores are floating weights on a different scale.
+Corpus statistics are computed within each ranking call and its measured duration;
+there is no cached or persisted lexical index. Snapshot/input schemas are unchanged.
+
+The three-case controlled development comparison is recorded in
+../evaluation/development/BM25_COMPARISON.md. Neither method retrieved a labeled
+implementation chunk at k=5. This does not establish general retrieval performance.

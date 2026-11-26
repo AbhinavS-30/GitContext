@@ -1,7 +1,9 @@
 # BM25 experiment proposal — November 25, 2026
 
-Status: explanation/proposal only. No BM25 code, dependencies, ranking changes, or
-new experiment results are included. The distinct-term baseline remains unchanged.
+Status: specification published in 01e54a7 before implementation and results.
+The candidate is now implemented as an explicit experimental mode. The controlled
+comparison found no improvement on the three draft cases; overlap stays default.
+See [comparison](../evaluation/development/BM25_COMPARISON.md).
 
 ## Motivation and hypothesis
 

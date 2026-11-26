@@ -8,6 +8,7 @@ from pathlib import Path
 
 from pydantic import TypeAdapter
 
+from gitcontext.bm25 import rank_bm25
 from gitcontext.discovery import DiscoveryLimits
 from gitcontext.evaluation_runner import EvaluationRun, run_evaluation
 from gitcontext.evaluation_summary import summarize_run
@@ -47,6 +48,10 @@ def _parser() -> argparse.ArgumentParser:
     for name in ("index", "inspect", "status", "refresh", "search", "evaluate"):
         command = commands.add_parser(name)
         command.add_argument("path", type=Path, help="local repository directory")
+        if name in ("search", "evaluate"):
+            command.add_argument(
+                "--ranking", choices=("overlap", "bm25"), default="overlap"
+            )
         if name == "evaluate":
             command.add_argument(
                 "--dataset",
@@ -108,7 +113,12 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError("Snapshot storage must not be a symlink")
         if args.command == "evaluate":
             run = run_evaluation(
-                destination, args.dataset, root, split=args.split, k=args.top_k
+                destination,
+                args.dataset,
+                root,
+                split=args.split,
+                k=args.top_k,
+                ranking=args.ranking,
             )
             summary = summarize_run(run)
             output = {
@@ -196,10 +206,16 @@ def main(argv: list[str] | None = None) -> int:
                 )
                 print(json.dumps(output, indent=2, ensure_ascii=False))
                 return {"stale": 3, "unknown": 4}[freshness.status]
-            ranked = rank_chunks(previous.chunks, args.query, top_k=args.top_k)
+            ranker = rank_chunks if args.ranking == "overlap" else rank_bm25
+            ranked = ranker(previous.chunks, args.query, top_k=args.top_k)
             output.update(asdict(ranked))
             output["evidence_state"] = "source_freshness_checked"
-            output["score_kind"] = "distinct_normalized_query_term_count"
+            output["lexical_method"] = args.ranking
+            output["score_kind"] = (
+                "distinct_normalized_query_term_count"
+                if args.ranking == "overlap"
+                else "bm25_positive_idf_weight"
+            )
             print(json.dumps(output, indent=2, ensure_ascii=False))
             return 0
         if args.command == "status":

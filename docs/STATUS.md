@@ -41,10 +41,21 @@ formal ten-question set or ranking/source change was created.
 ## Verification and publication
 
 The development drafts and provisional results are published as 0198fd1/16b1826
-with passing CI (310 tests). Current session: inspected clean Git state and read
-the primary Robertson/Zaragoza BM25 reference. docs/BM25_EXPERIMENT.md records a
-candidate hypothesis and fixed-comparison rules. No app code, ranking, labels,
-dependencies, or results changed. Only proposal/status documentation is local.
+with passing CI (310 tests). The fixed BM25 specification was published as 01e54a7
+before implementation/results. Codex implemented an opt-in BM25 ranker and CLI
+selection, with method/parameter provenance in evaluation runs and summaries.
+Overlap remains default; no dependencies, models, snapshot schema, or labels changed.
+
+Current local checks: 337 tests passed, Ruff lint/format and whitespace checks passed.
+The controlled installed-CLI comparison used the unchanged draft-v2 input and fixed
+source: both modes had 0/3 top-five hits and macro recall 0. All cases were current;
+all 15 references per mode matched saved metadata. Overlap exactly reproduced the
+original matches, scores, terms, and source metadata. These are three exposed
+Codex-reviewed cases, not independent relevance validation. See
+ evaluation/development/BM25_COMPARISON.md. Implementation/results publication is
+pending the current commit/push; its hash is available in Git history afterward.
+
+Earlier verification:
 
 - pytest: 310 passed (298 existing cases plus 12 evaluation CLI cases).
 - Ruff lint and formatting: passed. Git diff whitespace check: passed.
@@ -129,13 +140,15 @@ without post-result label/ranking changes. When asked for a relevance preference
 the user asked Codex's preference; Codex recommended retaining implementation as
 primary for these cases, with docs as support. This is not human relevance review.
 
-Next: explain BM25 term rarity, frequency saturation, and length normalization;
-ask why common-across-corpus terms should distinguish chunks less than rare terms,
-then wait before implementation. Record exact variant/parameters before comparison.
-Keep draft-v2 and the original outcome fixed. Do not claim general gains from three
-exposed development cases or create the deferred formal set. Independent human
-label/scope review remains pending. No new learner understanding is inferred from
-the request to move forward.
+Codex explained rarity, saturation, and length normalization. The user requested
+progression/publication; independent understanding was not demonstrated. The fixed
+candidate was implemented without tuning after observing results. Larger BM25
+weights than overlap counts do not imply better retrieval: the scales differ.
+
+Next: review why weighting alone did not find the implementation targets and clarify
+query/evidence vocabulary before another agreed experiment. Keep questions/labels
+fixed and preserve the negative result. Human label/scope review remains pending;
+the formal set stays deferred. Phase 3 continues; Phase 2 is already complete.
 
 No formal dataset, human-reviewed relevance dataset, general benchmark quality result, representative latency
 measurement, embeddings, hybrid ranking, model inference, or API exists. Unit tests

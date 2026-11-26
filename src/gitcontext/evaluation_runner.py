@@ -8,6 +8,7 @@ from pathlib import Path
 from time import perf_counter
 from typing import Literal
 
+from gitcontext.bm25 import BM25_PARAMETERS, BM25_VERSION, rank_bm25
 from gitcontext.evaluation import ObservationStatus, RetrievalMetrics, metrics_at_k
 from gitcontext.evaluation_inputs import (
     EvaluationCase,
@@ -62,7 +63,9 @@ class EvaluationRun:
     retrieval_mode: str = "lexical"
     python_runtime: str = sys.version.split()[0]
     platform: str = sys.platform
-    evaluation_version: str = "lexical-evaluation-v1"
+    evaluation_version: str = "lexical-evaluation-v2"
+    lexical_method: str = "overlap"
+    ranking_parameters: tuple[tuple[str, float], ...] = ()
 
 
 def load_evaluation_input(path: Path, snapshot: Snapshot) -> EvaluationDataset:
@@ -87,6 +90,7 @@ def run_evaluation(
     *,
     split: Literal["development", "held_out"],
     k: int = 5,
+    ranking: Literal["overlap", "bm25"] = "overlap",
 ) -> EvaluationRun:
     """Run supplied cases; do not author data, tune settings, save, or refresh.
 
@@ -99,6 +103,8 @@ def run_evaluation(
         raise ValueError("Choose development or held_out explicitly")
     if type(k) is not int or not 1 <= k <= MAX_TOP_K:
         raise ValueError(f"k must be an integer between 1 and {MAX_TOP_K}")
+    if ranking not in ("overlap", "bm25"):
+        raise ValueError("Choose overlap or bm25 ranking")
     setup_start = perf_counter()
     initial = load_snapshot(snapshot_path)
     dataset = load_evaluation_input(dataset_path, initial)
@@ -124,7 +130,8 @@ def run_evaluation(
             status = freshness.status
             if status == "current":
                 rank_start = perf_counter()
-                ranked = rank_chunks(snapshot.chunks, case.question, top_k=k)
+                ranker = rank_chunks if ranking == "overlap" else rank_bm25
+                ranked = ranker(snapshot.chunks, case.question, top_k=k)
                 ranking_seconds = perf_counter() - rank_start
                 matches = ranked.matches
                 citations_checked = len(matches)
@@ -182,4 +189,9 @@ def run_evaluation(
         file_count=len(initial.manifest.files),
         chunk_count=len(initial.chunks),
         dataset_case_count=len(dataset.cases),
+        lexical_method=ranking,
+        ranking_version=LEXICAL_RANKING_VERSION
+        if ranking == "overlap"
+        else BM25_VERSION,
+        ranking_parameters=() if ranking == "overlap" else BM25_PARAMETERS,
     )

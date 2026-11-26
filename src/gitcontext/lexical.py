@@ -16,7 +16,7 @@ MAX_TOP_K = 100
 @dataclass(frozen=True)
 class LexicalMatch:
     chunk_id: str
-    score: int
+    score: int | float
     matched_terms: tuple[str, ...]
     source: SourceChunk
 

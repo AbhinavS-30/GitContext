@@ -472,8 +472,21 @@ Empty/unmatched queries return an empty matches list with exit 0 after freshness
 passes. Queries over 2,000 characters and --top-k outside 1–100 are argument errors
 (exit 2); default top_k is 5. Search does not mutate the saved snapshot. Retrieval
 quality is not established beyond the provisional development diagnostic below;
-no BM25, semantic search, hybrid ranking, or model
-answers are included in this baseline.
+semantic search, hybrid ranking, and model answers are not implemented.
+
+An experimental BM25 candidate is available with `--ranking bm25` on `search` and
+`evaluate`; `--ranking overlap` remains the default. For example:
+
+```sh
+gitcontext search PATH "atomic snapshot save" --ranking bm25
+```
+
+BM25 uses expanded-token frequencies and chunk lengths with fixed k1=1.2 and
+b=0.75. Its weights are not comparable to overlap counts or probabilities. Both
+modes use the same freshness gates and source references. The fixed three-case
+development comparison found zero labeled top-five hits for both methods, so BM25
+was not promoted. See the [specification](docs/BM25_EXPERIMENT.md) and
+[qualified results](evaluation/development/BM25_COMPARISON.md).
 
 ## Evaluation preparation
 

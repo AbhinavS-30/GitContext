@@ -56,6 +56,8 @@ class EvaluationSummary:
     citation_observation_validity_rate: float | None
     timings: tuple[StatusTiming, ...]
     summary_version: str = "evaluation-summary-v1"
+    lexical_method: str = "overlap"
+    ranking_parameters: tuple[tuple[str, float], ...] = ()
 
 
 def _valid_time(value: float) -> bool:
@@ -140,6 +142,8 @@ def summarize_run(run: EvaluationRun) -> EvaluationSummary:
         ranking_version=run.ranking_version,
         tokenization_version=run.tokenization_version,
         k=run.k,
+        lexical_method=run.lexical_method,
+        ranking_parameters=run.ranking_parameters,
         attempted=len(rows),
         current=sum(item.status == "current" for item in rows),
         stale=sum(item.status == "stale" for item in rows),
